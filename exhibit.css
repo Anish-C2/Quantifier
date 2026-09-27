@@ -10,6 +10,10 @@ a{color:inherit}
 .shell{max-width:1500px;margin:auto;min-height:100vh;display:flex;flex-direction:column}
 header{padding:18px 28px 0;border-bottom:1px solid var(--line)}
 .mast{display:flex;justify-content:space-between;gap:20px;align-items:flex-end}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.tools button,.langlab select{padding:7px 10px;border:1px solid var(--line);background:#eee7d7;cursor:pointer}
+.langlab{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.langlab select{width:auto}
 .kicker{font-size:11px;letter-spacing:.18em;color:#6f675a;text-transform:uppercase}
 .logo{font-size:36px;line-height:1;margin-top:3px;letter-spacing:-.04em}
 .tag{font-style:italic;color:var(--muted);font-size:16px;margin-top:5px}
@@ -31,8 +35,6 @@ main{padding:18px 28px 20px;flex:1}
 .small{font-size:16px;line-height:1.5;color:#514b40}
 .muted{font-size:13px;line-height:1.5;color:var(--muted)}
 .grid2{display:grid;grid-template-columns:1.05fr 1fr;gap:14px;align-items:start}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .hero-title{font-size:40px;letter-spacing:-.04em;line-height:1.1;margin:6px 0 14px;max-width:16em}
 .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 label{display:block;font-size:13px;color:#6f675a;margin:13px 0 5px}
@@ -49,12 +51,13 @@ button.secondary{padding:9px 12px;border:1px solid var(--line);background:#eee7d
 .hall{min-height:58vh}
 canvas.viz{width:100%;height:280px;border:1px solid var(--line);background:#f9f6ed;display:block}
 canvas.viz.tall{height:420px}
-.bars{display:flex;align-items:flex-end;gap:10px;height:180px;border:1px solid var(--line);background:#f9f6ed;padding:10px}
-.bar{flex:1;background:var(--accent);display:flex;flex-direction:column;justify-content:flex-end;align-items:center;color:#fffdf6;font:12px/1.3 Georgia;min-height:8px}
-.bar span{background:transparent;color:#171612;margin-top:6px;padding-bottom:2px}
 .explain{border-left:3px solid var(--accent2);padding:10px 12px;background:#eee5d4;margin-top:12px}
 .explain b{font-size:12px}
 .explain p{font-size:18px;line-height:1.45;margin:6px 0 0;color:#2b271f}
+.mathbox{border:1px solid var(--line);background:#f8f4e9;padding:12px 14px;margin:12px 0;max-width:46em}
+.mathbox b{display:block;margin-bottom:6px}
+.mathbox p{margin:0 0 8px;font-size:15px;line-height:1.5;color:#2b271f}
+.model-tag{display:inline-block;font-size:12px;border:1px solid var(--line);padding:3px 8px;margin:0 0 8px;color:#5c564b}
 .ticket{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:16px}
 .ticket a,.ticket > div{display:block;border:1px solid var(--line);padding:14px;text-decoration:none;background:var(--paper2)}
 .ticket a:hover{background:#e8dfcb}
@@ -64,11 +67,11 @@ canvas.viz.tall{height:420px}
 .stagebar{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid var(--line);padding:12px 28px 18px}
 .stagebar .meta{font-size:13px;color:var(--muted)}
 .stagebar .navbtns{display:flex;gap:8px}
-.stagebar button{min-width:110px;padding:9px 12px;border:1px solid var(--line);background:#eee7d7;cursor:pointer}
+.stagebar button{min-width:70px;padding:9px 12px;border:1px solid var(--line);background:#eee7d7;cursor:pointer}
 .dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 .dots a{width:9px;height:9px;border-radius:50%;background:#cfc4ad;display:inline-block}
 .dots a.on{background:var(--accent)}
-.grid{display:grid;grid-template-columns:300px minmax(0,1fr);gap:14px;align-items:start}
+.grid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:14px;align-items:start}
 .runner-area{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:14px;min-width:0}
 .herohead{display:flex;justify-content:space-between;gap:15px;align-items:end}
 .big{font-size:37px;font-weight:bold;letter-spacing:-.04em;margin-top:3px}
@@ -103,7 +106,10 @@ th{font-size:13px;color:#655e52;background:#eee7d7}
 .meter{margin-top:10px}
 .barline{height:12px;border:1px solid var(--line);background:#efe8d6}
 .barline i{display:block;height:100%;width:0;background:#2a6f78}
-.statebox{font:15px/1.5 Georgia;background:#1b1a17;color:#d9d1bf;padding:12px;min-height:72px}
+.tour{display:none;position:fixed;left:0;right:0;bottom:0;padding:16px;pointer-events:none}
+.tour.on{display:block}
+.tourcard{pointer-events:auto;max-width:520px;margin:auto;background:#fffdf6;border:1px solid var(--line);padding:14px 16px;box-shadow:0 8px 30px rgba(0,0,0,.12)}
+.tourcard p{font-size:18px;margin:8px 0 12px}
 footer.note{text-align:center;color:var(--muted);font-size:13px;padding:0 28px 10px}
-@media(max-width:1100px){.maze-grid,.runner-area,.grid2,.grid3,.grid4{grid-template-columns:1fr}.grid{grid-template-columns:1fr}}
+@media(max-width:1100px){.maze-grid,.runner-area,.grid2{grid-template-columns:1fr}.grid{grid-template-columns:1fr}}
 @media(max-width:720px){header,main,.stagebar{padding-left:12px;padding-right:12px}.logo,.hero-title{font-size:28px}.plain,.explain p{font-size:18px}.topstats{display:none}canvas.viz.tall{height:320px}}
