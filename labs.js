@@ -1,25 +1,26 @@
 const ROUTES = [
-  {id:'overview', label:'Home', title:'Start'},
-  {id:'qubits', label:'Coin', title:'Coin'},
-  {id:'superposition', label:'Mix', title:'Mix'},
-  {id:'entanglement', label:'Two coins', title:'Two coins'},
-  {id:'grover', label:'Lock', title:'Find the number'},
+  {id:'overview', label:'Home', title:'Home'},
+  {id:'grover', label:'Password', title:'Password'},
   {id:'maze', label:'Maze', title:'Maze'},
-  {id:'uses', label:'In life', title:'In real life'},
-  {id:'compare', label:'True talk', title:'True talk'}
+  {id:'slit', label:'Two holes', title:'Double slit'},
+  {id:'atom', label:'Atom jump', title:'Atom jumps'},
+  {id:'cloud', label:'Cloud', title:'Electron cloud'},
+  {id:'bounce', label:'Bouncer', title:'Particle bouncer'}
 ];
 const $ = id => document.getElementById(id);
 const nav = $('mainNav');
 nav.innerHTML = ROUTES.map(r => '<a href="#/'+r.id+'" data-route="'+r.id+'">'+r.label+'</a>').join('');
-$('hallTickets').innerHTML = ROUTES.map((r,i)=>'<a href="#/'+r.id+'"><div class="n">'+(i+1)+'</div><div class="t">'+r.title+'</div><div class="d">Tap to open</div></a>').join('');
+$('hallTickets').innerHTML = ROUTES.filter(r=>r.id!=='overview').map(r=>'<a href="#/'+r.id+'"><div class="n">Open</div><div class="t">'+r.title+'</div><div class="d">#/'+r.id+'</div></a>').join('');
 $('dots').innerHTML = ROUTES.map(r=>'<a href="#/'+r.id+'" data-dot="'+r.id+'" title="'+r.title+'"></a>').join('');
 function parseHash(){
   let h = (location.hash||'').replace(/^#\/?/,'').split('?')[0].toLowerCase();
   if(!h || h==='home' || h==='start' || h==='index') return 'overview';
   if(h==='quantum' || h==='lab' || h==='search' || h==='pin' || h==='password' || h==='passwords' || h==='lock') return 'grover';
   if(h==='q-maze' || h==='qmaze') return 'maze';
-  if(h==='notation' || h==='reallife' || h==='why' || h==='life') return 'uses';
-  if(h==='gates' || h==='interference' || h==='deutsch' || h==='qubits') return ROUTES.some(r=>r.id===h) ? h : 'qubits';
+  if(h==='doubleslit' || h==='twoslit') return 'slit';
+  if(h==='energy' || h==='jumps') return 'atom';
+  if(h==='orbital' || h==='electron') return 'cloud';
+  if(h==='tunnel' || h==='barrier') return 'bounce';
   return ROUTES.some(r=>r.id===h) ? h : 'overview';
 }
 function go(id){
@@ -34,9 +35,12 @@ function show(id){
   const r = ROUTES[i];
   $('stageMeta').textContent = (i+1)+' / '+ROUTES.length+' · '+r.title;
   $('topStats').textContent = (i+1)+' / '+ROUTES.length;
-  if(id==='qubits') drawBloch();
   if(id==='grover') { try{ draw(); }catch(err){} }
   if(id==='maze') { try{ mazeEnsure(); }catch(err){} }
+  if(id==='slit') drawSlit();
+  if(id==='atom') drawAtom();
+  if(id==='cloud') drawCloud();
+  if(id==='bounce') drawBounce();
 }
 window.addEventListener('hashchange', ()=>show(parseHash()));
 $('prevBtn').onclick = ()=>{ const i=ROUTES.findIndex(r=>r.id===parseHash()); go(ROUTES[(i-1+ROUTES.length)%ROUTES.length].id); };
@@ -46,105 +50,263 @@ window.addEventListener('keydown', e=>{
   if(e.key==='ArrowRight' || e.key==='PageDown') { e.preventDefault(); $('nextBtn').click(); }
   if(e.key==='ArrowLeft' || e.key==='PageUp') { e.preventDefault(); $('prevBtn').click(); }
 });
-const C = (r=0,i=0)=>({r,i});
-const cadd = (a,b)=>C(a.r+b.r,a.i+b.i);
-const csub = (a,b)=>C(a.r-b.r,a.i-b.i);
-const cscale = (a,s)=>C(a.r*s,a.i*s);
-const cabs2 = a=>a.r*a.r+a.i*a.i;
-function cfmt(z){
-  const r=z.r.toFixed(2), i=z.i.toFixed(2);
-  if(Math.abs(z.i)<1e-9) return r;
-  return r+(z.i>=0?'+':'')+i+'i';
+function prepCanvas(id){
+  const cv=$(id); if(!cv) return null;
+  const ctx=cv.getContext('2d'), d=devicePixelRatio||1;
+  const W=cv.clientWidth, H=cv.clientHeight;
+  cv.width=W*d; cv.height=H*d; ctx.setTransform(d,0,0,d,0,0);
+  return {cv,ctx,W,H};
 }
-function measureState(amps){
-  const w = amps.map(cabs2);
-  let r=Math.random(), acc=0;
-  for(let i=0;i<w.length;i++){ acc+=w[i]; if(r<=acc) return i; }
-  return w.length-1;
+
+/* Double slit */
+let slitCount=2, slitWatch=false, slitHits=new Array(80).fill(0), slitTotal=0, slitMarks=[];
+function slitSample(){
+  const bins=slitHits.length, gap=+$('slitGap').value;
+  if(slitCount===1 || slitWatch){
+    const u=Math.random()*2-1;
+    const x=u*u*u;
+    return Math.max(0, Math.min(bins-1, Math.floor((x*0.55+0.5)*bins)));
+  }
+  for(let t=0;t<40;t++){
+    const x=Math.random()*2-1;
+    const env=Math.exp(-x*x*2.2);
+    const fr=Math.cos(x*gap*0.22);
+    const p=env*fr*fr;
+    if(Math.random()<p) return Math.max(0, Math.min(bins-1, Math.floor((x*0.5+0.5)*bins)));
+  }
+  return Math.floor(bins/2);
 }
-function qubitFromAngles(thDeg, phDeg){
-  const th=thDeg*Math.PI/180, ph=phDeg*Math.PI/180;
-  return {a0:C(Math.cos(th/2),0), a1:C(Math.sin(th/2)*Math.cos(ph), Math.sin(th/2)*Math.sin(ph)), th, ph};
+function fireSlit(n){
+  for(let i=0;i<n;i++){
+    const b=slitSample();
+    slitHits[b]++; slitTotal++;
+    slitMarks.push(b);
+    if(slitMarks.length>240) slitMarks.shift();
+  }
+  $('slitHits').textContent=String(slitTotal);
+  drawSlit();
 }
-function drawBloch(){
-  const th=+$('theta').value, ph=+$('phi').value;
-  $('thetaVal').textContent=th+'°'; $('phiVal').textContent=ph+'°';
-  const q=qubitFromAngles(th,ph);
-  const p0=cabs2(q.a0), p1=cabs2(q.a1);
-  $('p0').textContent=(p0*100).toFixed(0)+'%';
-  $('p1').textContent=(p1*100).toFixed(0)+'%';
-  $('qubitState').textContent='0 side: '+cfmt(q.a0)+'   1 side: '+cfmt(q.a1);
-  $('qubitExplain').textContent = p1<0.02 ? 'This is 0. If you look, you get 0.' : p0<0.02 ? 'This is 1. If you look, you get 1.' : 'Still in the air. Look, and it picks 0 or 1.';
-  const cv=$('bloch'), ctx=cv.getContext('2d'), d=devicePixelRatio||1;
-  const W=cv.clientWidth, H=cv.clientHeight; cv.width=W*d; cv.height=H*d; ctx.setTransform(d,0,0,d,0,0);
-  ctx.clearRect(0,0,W,H);
-  const cx=W/2, cy=H/2, R=Math.min(W,H)*0.36;
-  ctx.strokeStyle='#b8ad95'; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
-  ctx.beginPath(); ctx.ellipse(cx,cy,R,R*0.32,0,0,Math.PI*2); ctx.stroke();
-  ctx.fillStyle='#766f61'; ctx.font='16px Georgia';
-  ctx.fillText('0', cx-6, cy-R-8);
-  ctx.fillText('1', cx-6, cy+R+20);
-  const x=Math.sin(q.th)*Math.cos(q.ph), y=Math.cos(q.th), z=Math.sin(q.th)*Math.sin(q.ph);
-  const px=cx+x*R, py=cy-y*R*0.92+z*R*0.18;
-  ctx.strokeStyle='#173e48'; ctx.lineWidth=2.4;
-  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(px,py); ctx.stroke();
-  ctx.fillStyle='#8a5a32'; ctx.beginPath(); ctx.arc(px,py,5,0,Math.PI*2); ctx.fill();
+function drawSlit(){
+  const g=prepCanvas('slitCanvas'); if(!g) return;
+  const {ctx,W,H}=g;
+  ctx.fillStyle='#f9f6ed'; ctx.fillRect(0,0,W,H);
+  const srcX=28, wallX=W*0.38, screenX=W-36;
+  ctx.fillStyle='#173e48'; ctx.beginPath(); ctx.arc(srcX,H/2,7,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#171612'; ctx.fillRect(wallX-6,16,12,H-32);
+  const gap=+$('slitGap').value;
+  const mid=H/2, hole=10;
+  if(slitCount===1){
+    ctx.fillStyle='#f9f6ed'; ctx.fillRect(wallX-7,mid-hole,14,hole*2);
+  } else {
+    ctx.fillStyle='#f9f6ed';
+    ctx.fillRect(wallX-7,mid-gap-hole,14,hole*2);
+    ctx.fillRect(wallX-7,mid+gap-hole,14,hole*2);
+  }
+  if(slitWatch && slitCount===2){
+    ctx.strokeStyle='#8a5a32'; ctx.strokeRect(wallX-16,mid-gap-18,32,36);
+    ctx.strokeRect(wallX-16,mid+gap-18,32,36);
+  }
+  ctx.fillStyle='#e8dfcb'; ctx.fillRect(screenX-4,16,10,H-32);
+  const max=Math.max(1,...slitHits);
+  slitHits.forEach((c,i)=>{
+    const y=20+(i/(slitHits.length-1))*(H-40);
+    const len=(c/max)*(W*0.28);
+    ctx.fillStyle='#173e48';
+    ctx.fillRect(screenX-6-len,y-2,len,4);
+  });
+  slitMarks.slice(-40).forEach((b,i)=>{
+    const y=20+(b/(slitHits.length-1))*(H-40);
+    ctx.globalAlpha=0.25+i/80;
+    ctx.fillStyle='#8a5a32';
+    ctx.beginPath(); ctx.arc(screenX+10,y,2.2,0,Math.PI*2); ctx.fill();
+  });
+  ctx.globalAlpha=1;
+  ctx.fillStyle='#766f61'; ctx.font='13px Georgia';
+  ctx.fillText('gun', 16, H/2-14);
+  ctx.fillText('holes', wallX-16, 14);
+  ctx.fillText('screen', screenX-38, 14);
 }
-$('theta').oninput=$('phi').oninput=drawBloch;
-document.querySelectorAll('[data-prep]').forEach(b=>b.onclick=()=>{
-  const m={ '0':[0,0], '1':[180,0], '+':[90,0], '-':[90,180], 'i':[90,90], '-i':[90,270] }[b.dataset.prep];
-  $('theta').value=m[0]; $('phi').value=m[1]; drawBloch();
-});
-let hAmps=[C(1,0),C(0,0)], hCounts=[0,0];
-function renderH(){
-  $('hState').textContent='0 side: '+cfmt(hAmps[0])+'   1 side: '+cfmt(hAmps[1]);
-  const tot=hCounts[0]+hCounts[1];
-  $('hShots').textContent=String(tot);
-  const max=Math.max(1,hCounts[0],hCounts[1]);
-  $('hBars').innerHTML=[0,1].map(i=>{
-    const h=Math.max(8,(hCounts[i]/max)*150);
-    return '<div class="bar" style="height:'+h+'px">'+hCounts[i]+'<span>'+i+'</span></div>';
-  }).join('');
+function setSlitMode(){
+  $('slitOne').classList.toggle('active', slitCount===1);
+  $('slitTwo').classList.toggle('active', slitCount===2 && !slitWatch);
+  $('slitWatch').classList.toggle('active', slitWatch);
+  $('slitMode').textContent = slitWatch ? 'Watching' : (slitCount===1?'One hole':'Two holes');
+  $('slitTalk').textContent = slitWatch ? 'Watching kills the stripes.' : (slitCount===1?'One pile. Fire 200.' : 'Two holes. Look for stripes.');
+  drawSlit();
 }
-$('hApply').onclick=()=>{
-  const a=hAmps[0], b=hAmps[1], s=1/Math.sqrt(2);
-  hAmps=[cscale(cadd(a,b),s), cscale(csub(a,b),s)];
-  $('hTalk').textContent='Mixed. Now look.';
-  renderH();
+$('slitOne').onclick=()=>{ slitCount=1; slitWatch=false; setSlitMode(); };
+$('slitTwo').onclick=()=>{ slitCount=2; slitWatch=false; setSlitMode(); };
+$('slitWatch').onclick=()=>{ slitCount=2; slitWatch=!slitWatch; setSlitMode(); };
+$('slitGap').oninput=()=>{ $('slitGapVal').textContent=$('slitGap').value; drawSlit(); };
+$('slitFire').onclick=()=>fireSlit(1);
+$('slitMany').onclick=()=>fireSlit(200);
+$('slitClear').onclick=()=>{ slitHits=new Array(80).fill(0); slitTotal=0; slitMarks=[]; $('slitHits').textContent='0'; drawSlit(); };
+
+/* Atom jumps */
+let atomN=1, atomFlash=0, atomColor='#f4efdf', atomLabel='none';
+const atomCols=['#c44','#e39b2b','#7cbc4a','#4aa3d9','#7a6adf'];
+function drawAtom(){
+  const g=prepCanvas('atomCanvas'); if(!g) return;
+  const {ctx,W,H}=g;
+  ctx.fillStyle='#f9f6ed'; ctx.fillRect(0,0,W,H);
+  const cx=W/2, cy=H/2;
+  [1,2,3,4].forEach(n=>{
+    ctx.strokeStyle = n===atomN ? '#173e48' : '#cfc4ad';
+    ctx.lineWidth = n===atomN ? 3 : 1;
+    ctx.beginPath(); ctx.arc(cx,cy,28+n*28,0,Math.PI*2); ctx.stroke();
+    ctx.fillStyle='#766f61'; ctx.font='13px Georgia';
+    ctx.fillText('step '+n, cx+32+n*28-20, cy-8);
+  });
+  ctx.fillStyle='#8a5a32'; ctx.beginPath(); ctx.arc(cx,cy,10,0,Math.PI*2); ctx.fill();
+  const R=28+atomN*28;
+  const ang=performance.now()/700;
+  ctx.fillStyle='#173e48';
+  ctx.beginPath(); ctx.arc(cx+Math.cos(ang)*R, cy+Math.sin(ang)*R, 7,0,Math.PI*2); ctx.fill();
+  if(atomFlash>0){
+    ctx.globalAlpha=atomFlash;
+    ctx.fillStyle=atomColor;
+    ctx.beginPath(); ctx.arc(cx,cy,R+18,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=1;
+    atomFlash-=0.04;
+  }
+  $('atomStep').textContent=String(atomN);
+  $('atomLight').textContent=atomLabel;
+}
+function atomTick(){ if(document.querySelector('.view.on') && document.querySelector('.view.on').dataset.view==='atom') drawAtom(); requestAnimationFrame(atomTick); }
+requestAnimationFrame(atomTick);
+$('atomAdd').onclick=()=>{
+  if(atomN>=4){ $('atomTalk').textContent='Already on the top step.'; return; }
+  atomN++; atomFlash=0; atomLabel='none';
+  $('atomTalk').textContent='Jumped up to step '+atomN+'.';
+  drawAtom();
 };
-$('hReset').onclick=()=>{ hAmps=[C(1,0),C(0,0)]; hCounts=[0,0]; $('hLast').textContent='—'; $('hTalk').textContent='Back to 0.'; renderH(); };
-function takeShot(){
-  const i=measureState(hAmps);
-  hCounts[i]++; $('hLast').textContent=String(i);
-  $('hTalk').textContent='You got '+i+'. Look many times to see the mix.';
+$('atomDrop').onclick=()=>{
+  if(atomN<=1){ $('atomTalk').textContent='Already on step 1. Add energy first.'; return; }
+  const jump=atomN-1;
+  atomN--;
+  atomColor=atomCols[Math.min(atomCols.length-1,jump)];
+  atomFlash=0.85;
+  atomLabel=['red','orange','green','blue'][jump-1]||'light';
+  $('atomTalk').textContent='Jumped down. Flash: '+atomLabel+'.';
+  drawAtom();
+};
+$('atomReset').onclick=()=>{ atomN=1; atomFlash=0; atomLabel='none'; $('atomTalk').textContent='Back on step 1.'; drawAtom(); };
+
+/* Electron cloud */
+let cloudPts=[];
+function cloudPick(kind){
+  for(let k=0;k<80;k++){
+    const x=(Math.random()*2-1)*3.2, y=(Math.random()*2-1)*3.2;
+    const r=Math.hypot(x,y)+1e-6;
+    let p=0;
+    if(kind==='1s') p=Math.exp(-2.2*r);
+    else if(kind==='2s') p=Math.exp(-r)*(1-0.7*r)*(1-0.7*r);
+    else p=Math.exp(-1.15*r)*(y*y)/(r*r);
+    if(Math.random()<p) return {x,y};
+  }
+  return {x:0,y:0};
 }
-$('hShot').onclick=()=>{ takeShot(); renderH(); };
-$('hMany').onclick=()=>{ for(let k=0;k<200;k++) takeShot(); renderH(); };
-renderH();
-let e = [C(1,0),C(0,0),C(0,0),C(0,0)];
-let eCounts=[0,0,0,0];
-function eH0(){
-  const s=1/Math.sqrt(2);
-  const n=[C(),C(),C(),C()];
-  n[0]=cscale(cadd(e[0],e[2]),s);
-  n[1]=cscale(cadd(e[1],e[3]),s);
-  n[2]=cscale(csub(e[0],e[2]),s);
-  n[3]=cscale(csub(e[1],e[3]),s);
-  e=n;
+function drawCloud(){
+  const g=prepCanvas('cloudCanvas'); if(!g) return;
+  const {ctx,W,H}=g;
+  ctx.fillStyle='#f9f6ed'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#ddd4c3';
+  ctx.beginPath(); ctx.moveTo(W/2,12); ctx.lineTo(W/2,H-12); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(12,H/2); ctx.lineTo(W-12,H/2); ctx.stroke();
+  const S=Math.min(W,H)*0.14;
+  cloudPts.forEach(p=>{
+    ctx.fillStyle='rgba(23,62,72,0.35)';
+    ctx.beginPath(); ctx.arc(W/2+p.x*S, H/2+p.y*S, 2.4,0,Math.PI*2); ctx.fill();
+  });
+  ctx.fillStyle='#8a5a32'; ctx.beginPath(); ctx.arc(W/2,H/2,4,0,Math.PI*2); ctx.fill();
+  $('cloudDots').textContent=String(cloudPts.length);
+  $('cloudName').textContent=$('cloudOrb').value;
 }
-function eCnot(){ const t=e[2]; e[2]=e[3]; e[3]=t; }
-function renderBell(){
-  const labs=['00','01','10','11'];
-  $('bellState').textContent = labs.map((L,i)=>L+': '+cfmt(e[i])).join('    ');
-  const ps=e.map(cabs2);
-  ['b00','b01','b10','b11'].forEach((id,i)=>$(id).textContent=(ps[i]*100).toFixed(0)+'%');
-  const max=Math.max(1,...eCounts);
-  $('bellBars').innerHTML=eCounts.map((c,i)=>'<div class="bar" style="height:'+Math.max(8,c/max*150)+'px">'+c+'<span>'+labs[i]+'</span></div>').join('');
+function cloudAdd(n){
+  const kind=$('cloudOrb').value;
+  for(let i=0;i<n;i++) cloudPts.push(cloudPick(kind));
+  $('cloudTalk').textContent=cloudPts.length+' dots. The cloud is the map of looks.';
+  drawCloud();
 }
-$('bellReset').onclick=()=>{ e=[C(1,0),C(0,0),C(0,0),C(0,0)]; eCounts=[0,0,0,0]; $('bellTalk').textContent='Two zeros.'; renderBell(); };
-$('bellH').onclick=()=>{ eH0(); $('bellTalk').textContent='First coin is in the air.'; renderBell(); };
-$('bellCnot').onclick=()=>{ eCnot(); $('bellTalk').textContent='Linked.'; renderBell(); };
-$('bellPrep').onclick=()=>{ e=[C(1,0),C(0,0),C(0,0),C(0,0)]; eH0(); eCnot(); $('bellTalk').textContent='Pair ready. Look.'; renderBell(); };
-$('bellShot').onclick=()=>{ const i=measureState(e); eCounts[i]++; $('bellTalk').textContent='You got '+['00','01','10','11'][i]+'.'; renderBell(); };
-$('bellMany').onclick=()=>{ for(let k=0;k<200;k++) eCounts[measureState(e)]++; renderBell(); };
-renderBell();
+$('cloudScan').onclick=()=>cloudAdd(1);
+$('cloudMany').onclick=()=>cloudAdd(80);
+$('cloudClear').onclick=()=>{ cloudPts=[]; $('cloudTalk').textContent='Cleared. Scan again.'; drawCloud(); };
+$('cloudOrb').onchange=()=>{ cloudPts=[]; $('cloudTalk').textContent='New shape. Scan again.'; drawCloud(); };
+
+/* Particle bouncer */
+let bounceDots=[], bounceBack=0, bounceThru=0, bounceAnim=null;
+function bounceT(){
+  const V=+$('bounceH').value, L=+$('bounceW').value, E=5;
+  if(E>=V) return 0.82;
+  return Math.max(0.01, Math.min(0.95, Math.exp(-0.22*Math.sqrt(V-E)*L)));
+}
+function drawBounce(){
+  const g=prepCanvas('bounceCanvas'); if(!g) return;
+  const {ctx,W,H}=g;
+  ctx.fillStyle='#f9f6ed'; ctx.fillRect(0,0,W,H);
+  const V=+$('bounceH').value, L=+$('bounceW').value;
+  const wallW=18+L*6;
+  const wallX=W*0.55-wallW/2;
+  const wallH=40+V*10;
+  const base=H-28;
+  ctx.fillStyle='#cfc4ad'; ctx.fillRect(16,base,W-32,4);
+  ctx.fillStyle='#171612'; ctx.fillRect(wallX, base-wallH, wallW, wallH);
+  ctx.fillStyle='#766f61'; ctx.font='13px Georgia';
+  ctx.fillText('wall', wallX, base-wallH-8);
+  bounceDots.forEach(p=>{
+    ctx.fillStyle=p.side==='thru'?'#355f4a':(p.side==='back'?'#8a5a32':'#173e48');
+    ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2); ctx.fill();
+  });
+}
+function launchBounce(){
+  const g=prepCanvas('bounceCanvas'); if(!g) return;
+  const {W,H}=g;
+  const V=+$('bounceH').value, L=+$('bounceW').value;
+  const wallW=18+L*6;
+  const wallX=W*0.55-wallW/2;
+  const T=bounceT();
+  const n=40;
+  bounceDots=[];
+  for(let i=0;i<n;i++){
+    bounceDots.push({
+      x: 24,
+      y: 50+Math.random()*(H-90),
+      v: 2.2+Math.random()*1.4,
+      pass: Math.random()<T,
+      side: 'run',
+      done:false
+    });
+  }
+  $('bounceTalk').textContent='Wall is '+(T>0.35?'leaky.':'thick. Some may still sneak.');
+  if(bounceAnim) cancelAnimationFrame(bounceAnim);
+  function tick(){
+    let moving=false;
+    bounceDots.forEach(p=>{
+      if(p.done) return;
+      moving=true;
+      if(p.side==='run'){
+        p.x+=p.v;
+        if(p.x>=wallX){
+          if(p.pass) p.side='thru';
+          else p.side='back';
+        }
+      } else if(p.side==='thru'){
+        p.x+=p.v;
+        if(p.x>W-16){ p.done=true; bounceThru++; }
+      } else {
+        p.x-=p.v;
+        if(p.x<16){ p.done=true; bounceBack++; }
+      }
+    });
+    $('bounceBack').textContent=String(bounceBack);
+    $('bounceThru').textContent=String(bounceThru);
+    drawBounce();
+    if(moving) bounceAnim=requestAnimationFrame(tick);
+    else $('bounceTalk').textContent=bounceThru+' went through. '+bounceBack+' bounced.';
+  }
+  bounceAnim=requestAnimationFrame(tick);
+}
+$('bounceH').oninput=()=>{ $('bounceHVal').textContent=$('bounceH').value; drawBounce(); };
+$('bounceW').oninput=()=>{ $('bounceWVal').textContent=$('bounceW').value; drawBounce(); };
+$('bounceGo').onclick=()=>{ bounceBack=0; bounceThru=0; launchBounce(); };
+$('bounceClear').onclick=()=>{ bounceDots=[]; bounceBack=0; bounceThru=0; $('bounceBack').textContent='0'; $('bounceThru').textContent='0'; $('bounceTalk').textContent='Cleared.'; drawBounce(); };
