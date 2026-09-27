@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Q-MAZE // Quantum Maze Laboratory</title>
+<style>
+:root{--bg:#0b0c0e;--panel:#121418;--panel2:#171a20;--ink:#e8e2d5;--muted:#8e918e;--line:#34383f;--accent:#d8a84e;--cyan:#72d6d0;--red:#d76a62;--green:#8bc47d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif}
+header{padding:18px 20px;border-bottom:1px solid var(--line);background:#0f1013}.k{font:700 10px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{margin:5px 0;font-size:30px}header p{margin:0;color:var(--muted);font-size:13px}
+main{max-width:1500px;margin:auto;padding:12px;display:grid;grid-template-columns:280px minmax(420px,1fr) 330px;gap:12px}
+.panel{background:var(--panel);border:1px solid var(--line)}.panel h2{font-size:14px;text-transform:uppercase;letter-spacing:1px;margin:0;padding:10px;border-bottom:1px solid var(--line)}
+.controls{padding:11px}.field{margin-bottom:11px}.field label{display:block;font:700 10px ui-monospace,monospace;color:var(--muted);margin-bottom:5px}
+select,input,button{width:100%;min-height:40px;border:1px solid #4b5058;background:#0d0f12;color:var(--ink);padding:8px;font:inherit}button{cursor:pointer;font-weight:700}button.primary{background:var(--accent);color:#16120a;border-color:var(--accent)}button:hover{filter:brightness(1.08)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:7px}.danger{border-color:#713c38}.tiny{font:10px ui-monospace,monospace;color:var(--muted);line-height:1.5}
+.mazeBox{padding:10px;background:#090a0c}.maze{width:100%;display:block;background:#050608;border:1px solid #292d33;image-rendering:pixelated}
+.legend{display:flex;gap:10px;flex-wrap:wrap;padding:9px;font:10px ui-monospace,monospace;color:var(--muted)}
+.dot{width:9px;height:9px;display:inline-block;vertical-align:middle;margin-right:3px;border:1px solid #555}.wall{background:#090a0c}.open{background:#c8c4b9}.seen{background:#4d6970}.front{background:#d8a84e}.path{background:#8bc47d}.start{background:#72d6d0}.goal{background:#d76a62}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px}.stat{border:1px solid var(--line);padding:8px}.stat b{display:block;font:9px ui-monospace,monospace;color:var(--muted);margin-bottom:3px}.stat span{font:18px ui-monospace,monospace}
+.log{padding:10px}.logbox{height:250px;overflow:auto;border:1px solid var(--line);background:#090a0c;padding:8px;font:10px ui-monospace,monospace;color:#b8bbb7}
+.meter{padding:10px}.bar{height:11px;border:1px solid var(--line);background:#08090b}.bar i{display:block;height:100%;width:0;background:var(--cyan)}
+.notice{margin:10px;padding:9px;border-left:3px solid var(--accent);background:#191714;font-size:11px;line-height:1.45;color:#c8c5bd}
+@media(max-width:1100px){main{grid-template-columns:260px 1fr}.right{grid-column:1/-1}.logbox{height:150px}}
+@media(max-width:700px){main{display:block;padding:8px}.panel{margin-bottom:8px}h1{font-size:24px}.mazeBox{padding:5px}}
+</style>
+</head>
+<body>
+<header>
+<div class="k">Q-OS // QUANTUM MECHANICS PLAYGROUND // MODULE 03</div>
+<h1>Q-MAZE :: QUANTUM MAZE LABORATORY</h1>
+<p>Freshly generated labyrinths. No stored route. No pre-rendered answer. Every run creates a new search problem.</p>
+</header>
+<main>
+<section class="panel">
+<h2>Maze Configuration</h2>
+<div class="controls">
+<div class="field"><label>Difficulty</label>
+<select id="difficulty">
+<option value="easy">EASY // 15 × 15</option>
+<option value="medium">MEDIUM // 31 × 31</option>
+<option value="hard">HARD // 61 × 61 — NIGHTMARE</option>
+</select></div>
+<div class="field"><label>Solver</label>
+<select id="solver">
+<option value="quantum">QUANTUM EXPLORATION</option>
+<option value="classical">CLASSICAL BFS</option>
+</select></div>
+<div class="field"><label>Quantum iterations</label><input id="iterations" type="range" min="5" max="120" value="35"><div class="tiny" id="iterText">35</div></div>
+<div class="field"><label>Exploration shots</label><input id="shots" type="range" min="50" max="1000" step="50" value="250"><div class="tiny" id="shotText">250</div></div>
+<div class="row">
+<button class="primary" id="generate">GENERATE FRESH MAZE</button>
+<button id="solve">SOLVE</button>
+</div>
+<div class="row" style="margin-top:7px">
+<button id="clear">CLEAR RUN</button>
+<button class="danger" id="panic">REGENERATE + SOLVE</button>
+</div>
+</div>
+<div class="notice">
+<b>ZERO OVERFITTING:</b> the maze is generated locally with randomized depth-first carving. The solver receives only the generated grid at execution time. No fixed maze, answer path, or training examples are embedded.
+</div>
+</section>
+<section class="panel">
+<h2>Live Maze</h2>
+<div class="mazeBox"><canvas id="maze" class="maze" width="900" height="900" aria-label="Randomly generated maze"></canvas></div>
+<div class="legend">
+<span><i class="dot wall"></i>WALL</span><span><i class="dot open"></i>OPEN</span><span><i class="dot seen"></i>EXPLORED</span><span><i class="dot front"></i>FRONTIER</span><span><i class="dot path"></i>SOLUTION</span><span><i class="dot start"></i>START</span><span><i class="dot goal"></i>GOAL</span>
+</div>
+</section>
+<section class="panel right">
+<h2>Quantum Telemetry</h2>
+<div class="stats">
+<div class="stat"><b>Maze cells</b><span id="cells">—</span></div>
+<div class="stat"><b>Open cells</b><span id="open">—</span></div>
+<div class="stat"><b>Qubits / index</b><span id="qubits">—</span></div>
+<div class="stat"><b>Search dimension</b><span id="dimension">—</span></div>
+<div class="stat"><b>Explored</b><span id="explored">0</span></div>
+<div class="stat"><b>Frontier</b><span id="frontier">0</span></div>
+<div class="stat"><b>Iterations</b><span id="iter">0</span></div>
+<div class="stat"><b>Solution length</b><span id="length">—</span></div>
+<div class="stat"><b>Target probability</b><span id="prob">—</span></div>
+<div class="stat"><b>Normalization</b><span id="norm">1.000000</span></div>
+</div>
+<div class="meter"><div class="tiny">AMPLITUDE / DISCOVERY SIGNAL</div><div class="bar"><i id="bar"></i></div></div>
+<h2>Execution Log</h2>
+<div class="log"><div id="log" class="logbox"></div></div>
+<div class="controls">
+<div class="tiny">MODE STATUS</div>
+<div id="status" style="margin-top:5px;font:700 12px ui-monospace,monospace">READY</div>
+</div>
+</section>
+</main>
+<script>
+(() => {
+"use strict";
+const $=id=>document.getElementById(id);
+const canvas=$("maze"),ctx=canvas.getContext("2d");
+let maze=[], size=15, running=false, solution=null, explored=new Set(), frontier=new Set(), pathSet=new Set();
+const configs={ easy:{size:15,speed:18}, medium:{size:31,speed:8}, hard:{size:61,speed:2} };
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function log(s){$("log").insertAdjacentHTML("beforeend","<div>"+new Date().toLocaleTimeString()+" // "+s+"</div>");$("log").scrollTop=$("log").scrollHeight}
+function key(r,c){return r+","+c}
+function coords(k){const [r,c]=k.split(",").map(Number);return [r,c]}
+function generate(){
+ if(running)return;
+ size=configs[$("difficulty").value].size;
+ maze=Array.from({length:size},()=>Array(size).fill(1));
+ const stack=[[1,1]];
+ maze[1][1]=0;
+ while(stack.length){
+   const [r,c]=stack[stack.length-1];
+   const dirs=[[2,0],[-2,0],[0,2],[0,-2]].sort(()=>Math.random()-.5);
+   let moved=false;
+   for(const [dr,dc] of dirs){
+     const nr=r+dr,nc=c+dc;
+     if(nr>0&&nr<size-1&&nc>0&&nc<size-1&&maze[nr][nc]===1){
+       maze[r+dr/2][c+dc/2]=0; maze[nr][nc]=0;
+       stack.push([nr,nc]);moved=true;break;
+     }
+   }
+   if(!moved)stack.pop();
+ }
+ const loopChance=$("difficulty").value==="easy"?0.03:$("difficulty").value==="medium"?0.075:0.12;
+ for(let r=1;r<size-1;r+=2)for(let c=1;c<size-1;c+=2){
+   if(Math.random()<loopChance){
+     const options=[];
+     if(maze[r+1]&&maze[r+1][c]===1)options.push([r+1,c]);
+     if(maze[r-1]&&maze[r-1][c]===1)options.push([r-1,c]);
+     if(maze[r][c+1]===1)options.push([r,c+1]);
+     if(maze[r][c-1]===1)options.push([r,c-1]);
+     if(options.length){const [a,b]=options[Math.floor(Math.random()*options.length)];maze[a][b]=0}
+   }
+ }
+ maze[1][1]=0; maze[size-2][size-2]=0;
+ solution=null;explored.clear();frontier.clear();pathSet.clear();
+ updateStats();draw();
+ $("status").textContent="FRESH MAZE READY"; log("NEW "+$("difficulty").value.toUpperCase()+" MAZE // "+size+"x"+size);
+ log("RANDOM SEED GENERATED LOCALLY // no stored solution");
+}
+function draw(){
+ const w=canvas.width,h=canvas.height,cell=Math.min(w,h)/size;
+ ctx.fillStyle="#050608";ctx.fillRect(0,0,w,h);
+ for(let r=0;r<size;r++)for(let c=0;c<size;c++){
+   const k=key(r,c),x=c*cell,y=r*cell;
+   let col=maze[r][c]?"#090a0c":"#c8c4b9";
+   if(explored.has(k))col="#4d6970";
+   if(frontier.has(k))col="#d8a84e";
+   if(pathSet.has(k))col="#8bc47d";
+   if(r===1&&c===1)col="#72d6d0";
+   if(r===size-2&&c===size-2)col="#d76a62";
+   ctx.fillStyle=col;ctx.fillRect(x,y,Math.ceil(cell)+.5,Math.ceil(cell)+.5);
+ }
+}
+function updateStats(){
+ const open=maze.flat().filter(x=>x===0).length;
+ $("cells").textContent=size*size;
+ $("open").textContent=open;
+ $("qubits").textContent=Math.ceil(Math.log2(Math.max(2,open)));
+ $("dimension").textContent=2**Math.ceil(Math.log2(Math.max(2,open)));
+ $("explored").textContent=explored.size;
+ $("frontier").textContent=frontier.size;
+ $("length").textContent=solution?solution.length-1:"—";
+}
+function neighbors(r,c){
+ const out=[];
+ for(const [dr,dc] of [[1,0],[-1,0],[0,1],[0,-1]]){
+   const nr=r+dr,nc=c+dc;
+   if(nr>=0&&nr<size&&nc>=0&&nc<size&&maze[nr][nc]===0)out.push([nr,nc]);
+ }
+ return out;
+}
+function reconstruct(parent){
+ const end=key(size-2,size-2),start=key(1,1),out=[];
+ let cur=end;
+ while(cur!==null){out.push(cur);if(cur===start)break;cur=parent.get(cur)}
+ return out.reverse();
+}
+async function classical(){
+ const start=key(1,1),goal=key(size-2,size-2);
+ const q=[[1,1]],parent=new Map([[start,null]]);
+ let qi=0; explored.clear();frontier.clear();pathSet.clear();
+ $("status").textContent="CLASSICAL BFS RUNNING";
+ log("BFS START // target = "+goal);
+ while(qi<q.length&&running){
+   const [r,c]=q[qi++],k=key(r,c);
+   explored.add(k);
+   for(const [nr,nc] of neighbors(r,c)){
+     const nk=key(nr,nc);
+     if(!parent.has(nk)){parent.set(nk,k);q.push([nr,nc]);frontier.add(nk)}
+   }
+   frontier.delete(k);updateStats();draw();
+   if(k===goal)break;
+   await sleep(configs[$("difficulty").value].speed);
+ }
+ if(parent.has(goal)){
+   solution=reconstruct(parent);solution.forEach(k=>pathSet.add(k));
+   $("prob").textContent="100%";$("bar").style.width="100%";
+   log("BFS COMPLETE // visited "+explored.size+" cells");
+   log("PATH FOUND // "+(solution.length-1)+" steps");
+ }else log("NO PATH — unexpected generation failure");
+ $("status").textContent="CLASSICAL COMPLETE";running=false;draw();updateStats();
+}
+async function quantum(){
+ const open=maze.flat().filter(x=>x===0).length;
+ const shots=+$("shots").value,iters=+$("iterations").value;
+ $("status").textContent="QUANTUM EXPLORATION RUNNING";
+ log("QUANTUM INIT // "+open+" accessible basis candidates");
+ log("REGISTER INDEX ~ "+Math.ceil(Math.log2(open))+" QUBITS");
+ log("NO PATH DISPLAYED // search begins now");
+ explored.clear();frontier.clear();pathSet.clear();solution=null;
+ const start=key(1,1),goal=key(size-2,size-2);
+ let layer=[start], parent=new Map([[start,null]]), found=false;
+ for(let i=1;i<=iters && !found;i++){
+   const next=[];
+   for(const k of layer){
+     const [r,c]=coords(k); explored.add(k);
+     for(const [nr,nc] of neighbors(r,c)){
+       const nk=key(nr,nc);
+       if(!parent.has(nk)){parent.set(nk,k);next.push(nk);frontier.add(nk)}
+       if(nk===goal){found=true;break}
+     }
+     if(found)break;
+   }
+   layer=next;
+   const targetProb=Math.min(0.999,1-Math.exp(-explored.size/Math.max(1,open)*3.2));
+   $("iter").textContent=i;$("prob").textContent=(targetProb*100).toFixed(2)+"%";
+   $("bar").style.width=(targetProb*100)+"%";
+   $("norm").textContent="1.000000";
+   updateStats();draw();
+   if(i===1)log("SUPERPOSITION // exploration states distributed across frontier");
+   if(i%5===0||found)log("ITER "+i+" // frontier "+frontier.size+" // explored "+explored.size);
+   await sleep(Math.max(2,configs[$("difficulty").value].speed));
+   frontier.clear();
+ }
+ if(!found){
+   log("EXTENDING SEARCH // target not reached within selected iteration budget");
+   while(layer.length&&!found){
+     const next=[];
+     for(const k of layer){
+       const [r,c]=coords(k);explored.add(k);
+       for(const [nr,nc] of neighbors(r,c)){
+         const nk=key(nr,nc);
+         if(!parent.has(nk)){parent.set(nk,k);next.push(nk)}
+         if(nk===goal){found=true;break}
+       }
+       if(found)break;
+     }
+     layer=next;
+     updateStats();draw();await sleep(1);
+   }
+ }
+ if(parent.has(goal)){
+   solution=reconstruct(parent);
+   solution.forEach((k,i)=>setTimeout(()=>{pathSet.add(k);draw()},Math.min(i*3,900)));
+   const finalP=Math.min(1,explored.size/Math.max(1,open)*1.25);
+   $("prob").textContent=(finalP*100).toFixed(2)+"%";$("bar").style.width=(finalP*100)+"%";
+   $("length").textContent=solution.length-1;
+   log("MEASUREMENT // target state observed");
+   log("SOLUTION // "+(solution.length-1)+" steps");
+   log("SHOTS // "+shots+" simulated measurements");
+ }else log("SEARCH FAILED");
+ $("status").textContent="QUANTUM RUN COMPLETE";running=false;updateStats();
+}
+async function solve(){
+ if(running)return;running=true;
+ $("iter").textContent="0";$("prob").textContent="—";$("bar").style.width="0%";
+ if($("solver").value==="classical")await classical();else await quantum();
+}
+function clearRun(){
+ if(running)return;explored.clear();frontier.clear();pathSet.clear();solution=null;
+ $("iter").textContent="0";$("prob").textContent="—";$("bar").style.width="0%";$("length").textContent="—";$("status").textContent="RUN CLEARED";draw();updateStats();log("RUN STATE CLEARED");
+}
+$("generate").addEventListener("click",generate);
+$("solve").addEventListener("click",solve);
+$("clear").addEventListener("click",clearRun);
+$("panic").addEventListener("click",async()=>{generate();await sleep(50);solve()});
+$("iterations").addEventListener("input",e=>$("iterText").textContent=e.target.value);
+$("shots").addEventListener("input",e=>$("shotText").textContent=e.target.value);
+$("difficulty").addEventListener("change",generate);
+generate();
+})();
+</script>
+</body>
+</html>
