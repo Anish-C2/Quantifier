@@ -11,129 +11,31 @@
 <header>
   <div class="mast">
     <div>
-      <div class="kicker">A small show</div>
+      <div class="kicker">Tap. Watch. That is the whole show.</div>
       <div class="logo">Q-OS</div>
-      <div class="tag">Press NEXT. Look at the pictures. You do not need hard words.</div>
+      <div class="tag">Password hunt, maze, and four live toys.</div>
     </div>
-    <div class="topstats" id="topStats">1 / 8</div>
+    <div class="topstats" id="topStats">1 / 7</div>
   </div>
   <nav id="mainNav"></nav>
 </header>
 <main>
 
 <section class="view hall" data-view="overview">
-  <div class="eyebrow">1</div>
-  <h1 class="hero-title">This is a new kind of computer.</h1>
-  <p class="plain">A normal computer checks one idea, then the next idea.</p>
-  <p class="plain">This new computer can hold many ideas at the same time.</p>
-  <p class="plain">Then the wrong ideas fade. The right idea gets strong.</p>
-  <p class="plain">This page is only a demo on your phone or laptop. It is not a real quantum machine.</p>
+  <div class="eyebrow">Home</div>
+  <h1 class="hero-title">Six things you can tap.</h1>
+  <p class="plain">No extra rooms. Pick one.</p>
   <div class="ticket" id="hallTickets"></div>
-  <div class="explain"><b>What to do</b><p>Press NEXT. Or tap a card.</p></div>
-</section>
-
-<section class="view hall" data-view="qubits">
-  <div class="grid2">
-    <div class="card">
-      <div class="eyebrow">2 · Coin</div>
-      <h2>A normal computer uses 0 or 1.</h2>
-      <p class="plain">Like a coin on the table. Heads or tails. Done.</p>
-      <p class="plain">This new bit can stay in the air. Not 0. Not 1. Not yet.</p>
-      <p class="plain">When you look, it picks 0 or 1.</p>
-      <p class="plain"><b>In life:</b> this is one tiny switch inside that new computer.</p>
-      <label>Move toward 1 — <span id="thetaVal">0°</span></label>
-      <input type="range" id="theta" min="0" max="180" value="0">
-      <label>Turn it — <span id="phiVal">0°</span></label>
-      <input type="range" id="phi" min="0" max="360" value="0">
-      <div class="rowbtns">
-        <button data-prep="0">Make 0</button>
-        <button data-prep="1">Make 1</button>
-        <button data-prep="+">Half</button>
-        <button data-prep="-">Other half</button>
-        <button data-prep="i">Turn +</button>
-        <button data-prep="-i">Turn -</button>
-      </div>
-    </div>
-    <div class="card">
-      <canvas class="viz" id="bloch"></canvas>
-      <div class="twocol" style="margin-top:10px">
-        <div class="mini"><div class="k">Chance of 0</div><div class="v" id="p0">100%</div></div>
-        <div class="mini"><div class="k">Chance of 1</div><div class="v" id="p1">0%</div></div>
-      </div>
-      <div class="statebox" id="qubitState"></div>
-      <div class="explain"><b>Now</b><p id="qubitExplain">This is 0. If you look, you get 0.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="view hall" data-view="superposition">
-  <div class="grid2">
-    <div class="card">
-      <div class="eyebrow">3 · Mix</div>
-      <h2>Put the coin in the air. Then look many times.</h2>
-      <p class="plain">Press MIX. Now it is not only 0.</p>
-      <p class="plain">Press LOOK. You still get one answer. 0 or 1.</p>
-      <p class="plain">Press LOOK 200 TIMES. You should see about half and half.</p>
-      <p class="plain"><b>In life:</b> this is how the computer can try many lock numbers together.</p>
-      <div class="rowbtns">
-        <button id="hApply">Mix</button>
-        <button id="hReset">Back to 0</button>
-        <button id="hShot">Look once</button>
-        <button id="hMany">Look 200 times</button>
-      </div>
-      <div class="explain"><b>Now</b><p id="hTalk">Press Mix. Then press Look.</p></div>
-    </div>
-    <div class="card">
-      <div class="bars" id="hBars"></div>
-      <div class="twocol">
-        <div class="mini"><div class="k">Looks</div><div class="v" id="hShots">0</div></div>
-        <div class="mini"><div class="k">Last look</div><div class="v" id="hLast">—</div></div>
-      </div>
-      <div class="statebox" id="hState"></div>
-    </div>
-  </div>
-</section>
-
-<section class="view hall" data-view="entanglement">
-  <div class="grid2">
-    <div class="card">
-      <div class="eyebrow">4 · Two coins</div>
-      <h2>Link two coins. They land the same.</h2>
-      <p class="plain">Press MAKE PAIR.</p>
-      <p class="plain">Press LOOK 200 TIMES.</p>
-      <p class="plain">You should see 00 or 11. Almost no mix-up.</p>
-      <p class="plain"><b>In life:</b> labs use this to test a link. It is not mind reading.</p>
-      <div class="rowbtns">
-        <button id="bellReset">Two zeros</button>
-        <button id="bellH">Mix first coin</button>
-        <button id="bellCnot">Link them</button>
-        <button id="bellPrep">Make pair</button>
-        <button id="bellShot">Look once</button>
-        <button id="bellMany">Look 200 times</button>
-      </div>
-      <div class="explain"><b>Now</b><p id="bellTalk">Press Make pair. Then look many times.</p></div>
-    </div>
-    <div class="card">
-      <div class="statebox" id="bellState"></div>
-      <div class="bars" id="bellBars"></div>
-      <div class="grid4" style="margin-top:10px">
-        <div class="mini"><div class="k">00</div><div class="v" id="b00">100%</div></div>
-        <div class="mini"><div class="k">01</div><div class="v" id="b01">0%</div></div>
-        <div class="mini"><div class="k">10</div><div class="v" id="b10">0%</div></div>
-        <div class="mini"><div class="k">11</div><div class="v" id="b11">0%</div></div>
-      </div>
-    </div>
-  </div>
 </section>
 
 <section class="view" data-view="grover">
 <div class="grid">
 <section class="card">
-  <div class="eyebrow">5 · Find the number</div>
+  <div class="eyebrow">Password</div>
   <h2>A toy lock. Not a real password.</h2>
-  <p class="plain">The lock has a short number. Like a suitcase lock.</p>
-  <p class="plain">Normal hunt: try 0000, then 0001, then 0002.</p>
-  <p class="plain">New hunt: make the right number get strong. Then look.</p>
+  <p class="plain">The lock has a short number. Like a suitcase.</p>
+  <p class="plain">Normal hunt tries 0000, then 0001, then 0002.</p>
+  <p class="plain">New hunt makes the right number get strong. Then it looks.</p>
   <p class="plain">This will not open a phone, Wi-Fi, or bank.</p>
   <label id="targetLabel">Secret 5-digit number</label>
   <input id="secret" maxlength="5" value="31415" inputmode="numeric" autocomplete="off">
@@ -191,7 +93,7 @@
     <div class="stat"><div class="k">Time</div><div class="v" id="liveTime">0 ms</div></div>
   </div>
   <div class="section">
-    <h2 style="font-size:12px">Live</h2>
+    <h2 style="font-size:16px">Live</h2>
     <div class="stats">
       <div class="stat"><div class="k">Step</div><div class="v" id="liveIter">0 / 248</div></div>
       <div class="stat"><div class="k">Chance right</div><div class="v" id="liveProb">0.001%</div></div>
@@ -210,11 +112,10 @@
 </section>
 
 <section class="view" data-view="maze">
-  <div class="eyebrow">6 · Maze</div>
+  <div class="eyebrow">Maze</div>
   <h2>Find the way out.</h2>
   <p class="plain">Blue is start. Red is end. Green is the path.</p>
   <p class="plain">Press NEW MAZE. Then press FIND WAY.</p>
-  <p class="plain"><b>In life:</b> same idea as a robot in a building looking for a door.</p>
   <div class="maze-grid">
     <section class="card">
       <label>How hard?</label>
@@ -269,66 +170,130 @@
   </div>
 </section>
 
-<section class="view hall" data-view="uses">
-  <div class="eyebrow">7 · In real life</div>
-  <h1 class="hero-title">Where people hope to use this</h1>
-  <p class="plain">Not for WhatsApp. Not for YouTube. For a few hard jobs.</p>
-  <div class="ticket">
-    <a href="#/grover">
-      <div class="n">Toy lock</div>
-      <div class="t">Find a short number</div>
-      <div class="d">Like a suitcase lock. The new hunt can check a pile of numbers with fewer tries. A long real password is still hard. This page will not open a real account.</div>
-    </a>
-    <a href="#/maze">
-      <div class="n">Maze</div>
-      <div class="t">Find a path</div>
-      <div class="d">Same idea as a robot looking for a door. Or a van looking for a short road. Your car map today still uses a normal computer.</div>
-    </a>
-    <div>
-      <div class="n">Medicine</div>
-      <div class="t">New pills and batteries</div>
-      <div class="d">Atoms are small and strange. This kind of math fits that world. People hope it helps make medicine. It is not a home app yet.</div>
+<section class="view hall" data-view="slit">
+  <div class="grid2">
+    <div class="card">
+      <div class="eyebrow">Double slit</div>
+      <h2>Fire dots at one hole or two holes.</h2>
+      <p class="plain">One hole: a pile in the middle.</p>
+      <p class="plain">Two holes: stripes. Light and dark.</p>
+      <p class="plain">Watch the holes: stripes go away.</p>
+      <div class="rowbtns">
+        <button id="slitOne">One hole</button>
+        <button id="slitTwo" class="active">Two holes</button>
+        <button id="slitWatch">Watch the holes</button>
+      </div>
+      <label>Gap between holes — <span id="slitGapVal">24</span></label>
+      <input id="slitGap" type="range" min="10" max="48" value="24">
+      <div class="rowbtns">
+        <button id="slitFire">Fire 1</button>
+        <button id="slitMany">Fire 200</button>
+        <button id="slitClear">Wipe screen</button>
+      </div>
+      <div class="twocol">
+        <div class="mini"><div class="k">Hits</div><div class="v" id="slitHits">0</div></div>
+        <div class="mini"><div class="k">Mode</div><div class="v" id="slitMode">Two holes</div></div>
+      </div>
+      <div class="explain"><b>Now</b><p id="slitTalk">Press Fire 200. Look for stripes.</p></div>
     </div>
-    <div>
-      <div class="n">Plans</div>
-      <div class="t">Shops, vans, time tables</div>
-      <div class="d">“Which van goes first?” has many answers. A new computer may help pick a good plan. Not ready in your pocket.</div>
-    </div>
-    <div>
-      <div class="n">Banks later</div>
-      <div class="t">New locks on the internet</div>
-      <div class="d">Some old online locks may get weak one day. People are already making new locks. That is the safe plan.</div>
+    <div class="card">
+      <canvas class="viz tall" id="slitCanvas"></canvas>
     </div>
   </div>
 </section>
 
-<section class="view hall" data-view="compare">
-  <div class="eyebrow">8 · True talk</div>
-  <h2>What this page is. What it is not.</h2>
-  <div class="tablewrap" style="margin-top:12px">
-    <table>
-      <thead><tr><th>Job</th><th>Normal computer</th><th>This idea</th></tr></thead>
-      <tbody>
-        <tr><td>Find a toy lock number</td><td>Try many numbers</td><td>Fewer smart checks</td></tr>
-        <tr><td>Walk a maze</td><td>Try hall by hall</td><td>Hunt many halls in a model</td></tr>
-        <tr><td>Watch a video</td><td>Already good</td><td>No need</td></tr>
-        <tr><td>Open a real account</td><td>Do not</td><td>This site will not</td></tr>
-      </tbody>
-    </table>
+<section class="view hall" data-view="atom">
+  <div class="grid2">
+    <div class="card">
+      <div class="eyebrow">Atomic energy jumps</div>
+      <h2>Give the atom energy. Watch the electron jump.</h2>
+      <p class="plain">The electron can sit on step 1, 2, 3, or 4. Not in between.</p>
+      <p class="plain">ADD ENERGY: it jumps up.</p>
+      <p class="plain">RELEASE: it jumps down and makes a flash of light.</p>
+      <div class="rowbtns">
+        <button id="atomAdd">Add energy</button>
+        <button id="atomDrop">Release</button>
+        <button id="atomReset">Back to step 1</button>
+      </div>
+      <div class="twocol">
+        <div class="mini"><div class="k">Step now</div><div class="v" id="atomStep">1</div></div>
+        <div class="mini"><div class="k">Last light</div><div class="v" id="atomLight">none</div></div>
+      </div>
+      <div class="explain"><b>Now</b><p id="atomTalk">Press Add energy.</p></div>
+    </div>
+    <div class="card">
+      <canvas class="viz tall" id="atomCanvas"></canvas>
+    </div>
   </div>
-  <div class="explain"><b>One line</b><p>We show the idea with a suitcase lock and a maze. We do not break real locks.</p></div>
+</section>
+
+<section class="view hall" data-view="cloud">
+  <div class="grid2">
+    <div class="card">
+      <div class="eyebrow">Electron cloud</div>
+      <h2>Tap SCAN. Dots show where the electron may be.</h2>
+      <p class="plain">One scan is one look. Many scans make a cloud.</p>
+      <p class="plain">1s is a ball. 2s has a gap. 2p looks like two blobs.</p>
+      <label>Which shape?</label>
+      <select id="cloudOrb">
+        <option value="1s">1s — ball</option>
+        <option value="2s">2s — ball with a gap</option>
+        <option value="2p">2p — two blobs</option>
+      </select>
+      <div class="rowbtns">
+        <button id="cloudScan">Scan</button>
+        <button id="cloudMany">Scan 80 times</button>
+        <button id="cloudClear">Clear</button>
+      </div>
+      <div class="twocol">
+        <div class="mini"><div class="k">Dots</div><div class="v" id="cloudDots">0</div></div>
+        <div class="mini"><div class="k">Shape</div><div class="v" id="cloudName">1s</div></div>
+      </div>
+      <div class="explain"><b>Now</b><p id="cloudTalk">Pick a shape. Press Scan 80 times.</p></div>
+    </div>
+    <div class="card">
+      <canvas class="viz tall" id="cloudCanvas"></canvas>
+    </div>
+  </div>
+</section>
+
+<section class="view hall" data-view="bounce">
+  <div class="grid2">
+    <div class="card">
+      <div class="eyebrow">Particle bouncer</div>
+      <h2>Throw dots at a wall. Some bounce. Some sneak through.</h2>
+      <p class="plain">A normal ball cannot go through a wall.</p>
+      <p class="plain">A tiny quantum dot sometimes can. That is tunneling.</p>
+      <label>Wall height — <span id="bounceHVal">8</span></label>
+      <input id="bounceH" type="range" min="2" max="16" value="8">
+      <label>Wall width — <span id="bounceWVal">6</span></label>
+      <input id="bounceW" type="range" min="2" max="16" value="6">
+      <div class="rowbtns">
+        <button id="bounceGo">Launch 40</button>
+        <button id="bounceClear">Clear</button>
+      </div>
+      <div class="twocol">
+        <div class="mini"><div class="k">Bounced</div><div class="v" id="bounceBack">0</div></div>
+        <div class="mini"><div class="k">Went through</div><div class="v" id="bounceThru">0</div></div>
+      </div>
+      <div class="explain"><b>Now</b><p id="bounceTalk">Make the wall fat or tall. Then launch.</p></div>
+    </div>
+    <div class="card">
+      <canvas class="viz tall" id="bounceCanvas"></canvas>
+    </div>
+  </div>
 </section>
 
 </main>
 <div class="stagebar">
-  <div class="meta" id="stageMeta">1 / 8</div>
+  <div class="meta" id="stageMeta">1 / 7</div>
   <div class="dots" id="dots"></div>
   <div class="navbtns">
     <button id="prevBtn">BACK</button>
     <button id="nextBtn">NEXT</button>
   </div>
 </div>
-<footer class="note">Press the arrow keys to move</footer>
+<footer class="note">Arrow keys move between rooms</footer>
 </div>
 <script src="labs.js"></script>
 <script src="maze.js"></script>
