@@ -11,11 +11,21 @@
 <header>
   <div class="mast">
     <div>
-      <div class="kicker">Tap. Watch. That is the whole show.</div>
+      <div class="kicker">Q-OS</div>
       <div class="logo">Q-OS</div>
-      <div class="tag">Password hunt, maze, and four live toys.</div>
+      <div class="tag" id="uiTag">Password, maze, and four toys.</div>
     </div>
-    <div class="topstats" id="topStats">1 / 7</div>
+    <div class="tools">
+      <button type="button" id="tourBtn">? Tour</button>
+      <label class="langlab">
+        <span>A / अ</span>
+        <select id="langSel">
+          <option value="en">English</option>
+          <option value="hi">हिन्दी</option>
+        </select>
+      </label>
+      <div class="topstats" id="topStats">1 / 7</div>
+    </div>
   </div>
   <nav id="mainNav"></nav>
 </header>
@@ -23,8 +33,8 @@
 
 <section class="view hall" data-view="overview">
   <div class="eyebrow">Home</div>
-  <h1 class="hero-title">Six things you can tap.</h1>
-  <p class="plain">No extra rooms. Pick one.</p>
+  <h1 class="hero-title" id="homeTitle">Six things you can tap.</h1>
+  <p class="plain" id="homeP">Pick a card.</p>
   <div class="ticket" id="hallTickets"></div>
 </section>
 
@@ -32,11 +42,11 @@
 <div class="grid">
 <section class="card">
   <div class="eyebrow">Password</div>
-  <h2>A toy lock. Not a real password.</h2>
-  <p class="plain">The lock has a short number. Like a suitcase.</p>
-  <p class="plain">Normal hunt tries 0000, then 0001, then 0002.</p>
-  <p class="plain">New hunt makes the right number get strong. Then it looks.</p>
-  <p class="plain">This will not open a phone, Wi-Fi, or bank.</p>
+  <h2 id="pinTitle">Toy lock. Not a real password.</h2>
+  <p class="plain">🔒 suitcase number. Not a phone. Not a bank.</p>
+  <p class="plain">→ Normal hunt: type 0000, 0001, 0002.</p>
+  <p class="plain">∿ New hunt: make the right number strong, then look.</p>
+  <div class="mathbox" id="pinMath"></div>
   <label id="targetLabel">Secret 5-digit number</label>
   <input id="secret" maxlength="5" value="31415" inputmode="numeric" autocomplete="off">
   <div id="classicalTargetWrap" style="display:none">
@@ -52,8 +62,8 @@
     <button id="qmode" class="active">NEW HUNT</button>
     <button id="cmode">NORMAL HUNT</button>
   </div>
-  <button class="action" id="run">START</button>
-  <button class="secondary" id="prepare">RESET</button>
+  <button class="action" id="run">▶ START</button>
+  <button class="secondary" id="prepare">↺ RESET</button>
   <div class="explain"><b>Now</b><p id="ai">Pick a hunt. Press START.</p></div>
   <div class="result" id="result"><div class="rk">Number we got</div><div class="code" id="resultCode">—</div><div class="rs" id="resultStatus">Not started.</div></div>
 </section>
@@ -76,16 +86,16 @@
     <div class="stat"><div class="k">Numbers in the pile</div><div class="v" id="N">100,000</div></div>
     <div class="stat"><div class="k">Tiny switches used</div><div class="v" id="Q">17</div></div>
     <div class="stat"><div class="k">How mixed at start</div><div class="v" id="entropy">16.61 bits</div></div>
-    <div class="stat"><div class="k">Smart steps</div><div class="v" id="optimal">248</div></div>
-    <div class="stat"><div class="k">Checks so far</div><div class="v" id="oracle">0</div></div>
+    <div class="stat"><div class="k">Smart steps k</div><div class="v" id="optimal">248</div></div>
+    <div class="stat"><div class="k">Queries so far</div><div class="v" id="oracle">0</div></div>
     <div class="stat"><div class="k">Boost steps</div><div class="v" id="diff">0</div></div>
     <div class="stat"><div class="k">Recipe length</div><div class="v" id="depth">0</div></div>
-    <div class="stat"><div class="k">Memory slots</div><div class="v" id="dimension">131,072</div></div>
+    <div class="stat"><div class="k">List length</div><div class="v" id="dimension">131,072</div></div>
     <div class="stat"><div class="k">Memory used</div><div class="v" id="memory">2.00 MB</div></div>
     <div class="stat"><div class="k">Still fair?</div><div class="v" id="norm">1.000000</div></div>
     <div class="stat"><div class="k">Normal hunt average</div><div class="v" id="classAvg">50,000</div></div>
     <div class="stat"><div class="k">New hunt checks</div><div class="v" id="quantumQueries">248</div></div>
-    <div class="stat"><div class="k">Shortcut size</div><div class="v" id="sqrtN">316.23</div></div>
+    <div class="stat"><div class="k">√N</div><div class="v" id="sqrtN">316.23</div></div>
     <div class="stat"><div class="k">Fewer checks?</div><div class="v" id="ratio">126.6x</div></div>
     <div class="stat"><div class="k">Engine</div><div class="v" id="engine">IDLE</div></div>
     <div class="stat"><div class="k">Looks at the end</div><div class="v" id="shots">0</div></div>
@@ -113,9 +123,13 @@
 
 <section class="view" data-view="maze">
   <div class="eyebrow">Maze</div>
-  <h2>Find the way out.</h2>
-  <p class="plain">Blue is start. Red is end. Green is the path.</p>
-  <p class="plain">Press NEW MAZE. Then press FIND WAY.</p>
+  <h2 id="mazeTitle">Find the way out.</h2>
+  <p class="plain" id="mazeHint">Blue start. Red end. Green path.</p>
+  <div class="mathbox">
+    <b>What the two modes are</b>
+    <p>→ Hall by hall = normal BFS. One square, then the next.</p>
+    <p>∿ Wave search = a number on every open square. Each step the wave moves to neighbours, then the end square is boosted (Grover step). P(end) on the scoreboard is that square’s |amp|². The green path is drawn after, with normal hall-walk. This laptop does the list math. Not a quantum chip.</p>
+  </div>
   <div class="maze-grid">
     <section class="card">
       <label>How hard?</label>
@@ -126,18 +140,18 @@
       </select>
       <label>How to search</label>
       <select id="mazeSolver">
-        <option value="quantum">New search</option>
-        <option value="classical">Normal search</option>
+        <option value="quantum">Wave search</option>
+        <option value="classical">Hall by hall</option>
       </select>
-      <label>How long to hunt — <span id="mazeIterText">35</span></label>
+      <label>Wave steps — <span id="mazeIterText">35</span></label>
       <input id="mazeIters" type="range" min="5" max="120" value="35">
-      <label>How many looks — <span id="mazeShotText">250</span></label>
+      <label class="muted">Looks slider is unused in wave mode — <span id="mazeShotText">250</span></label>
       <input id="mazeShots" type="range" min="50" max="1000" step="50" value="250">
       <div class="rowbtns">
-        <button id="mazeGenerate">New maze</button>
-        <button id="mazeSolve">Find way</button>
-        <button id="mazeClear">Clear path</button>
-        <button id="mazePanic">New maze + find</button>
+        <button id="mazeGenerate">+ New maze</button>
+        <button id="mazeSolve">▶ Find way</button>
+        <button id="mazeClear">✕ Clear</button>
+        <button id="mazePanic">+ and ▶</button>
       </div>
       <div class="explain"><b>Now</b><p id="mazeGuide">Press New maze. Then Find way.</p></div>
     </section>
@@ -146,9 +160,9 @@
       <div class="legend">
         <span><i class="dot wall"></i>wall</span>
         <span><i class="dot open"></i>open</span>
-        <span><i class="dot seen"></i>tried</span>
-        <span><i class="dot front"></i>next</span>
-        <span><i class="dot path"></i>way</span>
+        <span><i class="dot seen"></i>wave</span>
+        <span><i class="dot front"></i>hot</span>
+        <span><i class="dot path"></i>path</span>
         <span><i class="dot start"></i>start</span>
         <span><i class="dot goal"></i>end</span>
       </div>
@@ -157,14 +171,14 @@
       <div class="stats">
         <div class="stat"><div class="k">Squares</div><div class="v" id="mazeCells">—</div></div>
         <div class="stat"><div class="k">Open squares</div><div class="v" id="mazeOpen">—</div></div>
-        <div class="stat"><div class="k">Tried</div><div class="v" id="mazeExplored">0</div></div>
-        <div class="stat"><div class="k">Next to try</div><div class="v" id="mazeFrontier">0</div></div>
+        <div class="stat"><div class="k">Lit by wave</div><div class="v" id="mazeExplored">0</div></div>
+        <div class="stat"><div class="k">Live squares</div><div class="v" id="mazeFrontier">0</div></div>
         <div class="stat"><div class="k">Steps</div><div class="v" id="mazeIter">0</div></div>
         <div class="stat"><div class="k">Path length</div><div class="v" id="mazeLen">—</div></div>
-        <div class="stat"><div class="k">Chance</div><div class="v" id="mazeProb">—</div></div>
+        <div class="stat"><div class="k">P(end)</div><div class="v" id="mazeProb">—</div></div>
         <div class="stat"><div class="k">Status</div><div class="v" id="mazeStatus">Ready</div></div>
       </div>
-      <div class="meter"><div class="muted">Progress</div><div class="barline"><i id="mazeBar"></i></div></div>
+      <div class="meter"><div class="muted">P(end) gauge</div><div class="barline"><i id="mazeBar"></i></div></div>
       <div class="log" id="mazeLog"></div>
     </section>
   </div>
@@ -174,27 +188,27 @@
   <div class="grid2">
     <div class="card">
       <div class="eyebrow">Double slit</div>
-      <h2>Fire dots at one hole or two holes.</h2>
-      <p class="plain">One hole: a pile in the middle.</p>
-      <p class="plain">Two holes: stripes. Light and dark.</p>
-      <p class="plain">Watch the holes: stripes go away.</p>
+      <div class="model-tag" data-model>Toy model</div>
+      <h2 id="slitTitle">Fire dots at holes.</h2>
+      <p class="plain">○ one hole = one pile. ○○ two holes = stripes.</p>
+      <p class="plain">Eye on the holes = stripes die. Fake which-path.</p>
       <div class="rowbtns">
-        <button id="slitOne">One hole</button>
-        <button id="slitTwo" class="active">Two holes</button>
-        <button id="slitWatch">Watch the holes</button>
+        <button id="slitOne">○ One</button>
+        <button id="slitTwo" class="active">○○ Two</button>
+        <button id="slitWatch">👁 Watch</button>
       </div>
-      <label>Gap between holes — <span id="slitGapVal">24</span></label>
+      <label>Gap — <span id="slitGapVal">24</span></label>
       <input id="slitGap" type="range" min="10" max="48" value="24">
       <div class="rowbtns">
-        <button id="slitFire">Fire 1</button>
-        <button id="slitMany">Fire 200</button>
-        <button id="slitClear">Wipe screen</button>
+        <button id="slitFire">▶ 1</button>
+        <button id="slitMany">▶ 200</button>
+        <button id="slitClear">✕</button>
       </div>
       <div class="twocol">
         <div class="mini"><div class="k">Hits</div><div class="v" id="slitHits">0</div></div>
         <div class="mini"><div class="k">Mode</div><div class="v" id="slitMode">Two holes</div></div>
       </div>
-      <div class="explain"><b>Now</b><p id="slitTalk">Press Fire 200. Look for stripes.</p></div>
+      <div class="explain"><b>Now</b><p id="slitTalk">Press 200. Look for stripes.</p></div>
     </div>
     <div class="card">
       <canvas class="viz tall" id="slitCanvas"></canvas>
@@ -205,19 +219,18 @@
 <section class="view hall" data-view="atom">
   <div class="grid2">
     <div class="card">
-      <div class="eyebrow">Atomic energy jumps</div>
-      <h2>Give the atom energy. Watch the electron jump.</h2>
-      <p class="plain">The electron can sit on step 1, 2, 3, or 4. Not in between.</p>
-      <p class="plain">ADD ENERGY: it jumps up.</p>
-      <p class="plain">RELEASE: it jumps down and makes a flash of light.</p>
+      <div class="eyebrow">Atom jumps</div>
+      <div class="model-tag" data-model>Toy model</div>
+      <h2 id="atomTitle">Give energy. Watch the jump.</h2>
+      <p class="plain">Steps 1–4 only. Not a real spectrum.</p>
       <div class="rowbtns">
-        <button id="atomAdd">Add energy</button>
-        <button id="atomDrop">Release</button>
-        <button id="atomReset">Back to step 1</button>
+        <button id="atomAdd">↑ Add energy</button>
+        <button id="atomDrop">↓ Release</button>
+        <button id="atomReset">↺ 1</button>
       </div>
       <div class="twocol">
-        <div class="mini"><div class="k">Step now</div><div class="v" id="atomStep">1</div></div>
-        <div class="mini"><div class="k">Last light</div><div class="v" id="atomLight">none</div></div>
+        <div class="mini"><div class="k">Step</div><div class="v" id="atomStep">1</div></div>
+        <div class="mini"><div class="k">Light</div><div class="v" id="atomLight">none</div></div>
       </div>
       <div class="explain"><b>Now</b><p id="atomTalk">Press Add energy.</p></div>
     </div>
@@ -231,25 +244,25 @@
   <div class="grid2">
     <div class="card">
       <div class="eyebrow">Electron cloud</div>
-      <h2>Tap SCAN. Dots show where the electron may be.</h2>
-      <p class="plain">One scan is one look. Many scans make a cloud.</p>
-      <p class="plain">1s is a ball. 2s has a gap. 2p looks like two blobs.</p>
-      <label>Which shape?</label>
+      <div class="model-tag" data-model>Toy model</div>
+      <h2 id="cloudTitle">Scan. Dots make a cloud.</h2>
+      <p class="plain">Flat 2D sketch of 1s / 2s / 2p. Not a 3D lab plot.</p>
+      <label>Shape</label>
       <select id="cloudOrb">
-        <option value="1s">1s — ball</option>
-        <option value="2s">2s — ball with a gap</option>
-        <option value="2p">2p — two blobs</option>
+        <option value="1s">1s ball</option>
+        <option value="2s">2s gap</option>
+        <option value="2p">2p blobs</option>
       </select>
       <div class="rowbtns">
-        <button id="cloudScan">Scan</button>
-        <button id="cloudMany">Scan 80 times</button>
-        <button id="cloudClear">Clear</button>
+        <button id="cloudScan">· Scan</button>
+        <button id="cloudMany">·· 80</button>
+        <button id="cloudClear">✕</button>
       </div>
       <div class="twocol">
         <div class="mini"><div class="k">Dots</div><div class="v" id="cloudDots">0</div></div>
         <div class="mini"><div class="k">Shape</div><div class="v" id="cloudName">1s</div></div>
       </div>
-      <div class="explain"><b>Now</b><p id="cloudTalk">Pick a shape. Press Scan 80 times.</p></div>
+      <div class="explain"><b>Now</b><p id="cloudTalk">Scan 80 times.</p></div>
     </div>
     <div class="card">
       <canvas class="viz tall" id="cloudCanvas"></canvas>
@@ -260,23 +273,23 @@
 <section class="view hall" data-view="bounce">
   <div class="grid2">
     <div class="card">
-      <div class="eyebrow">Particle bouncer</div>
-      <h2>Throw dots at a wall. Some bounce. Some sneak through.</h2>
-      <p class="plain">A normal ball cannot go through a wall.</p>
-      <p class="plain">A tiny quantum dot sometimes can. That is tunneling.</p>
+      <div class="eyebrow">Bouncer</div>
+      <div class="model-tag" data-model>Toy model</div>
+      <h2 id="bounceTitle">Some bounce. Some sneak.</h2>
+      <p class="plain">Pass chance ≈ e^{-c √(V-E) L}. Cartoon wall, not a lab barrier.</p>
       <label>Wall height — <span id="bounceHVal">8</span></label>
       <input id="bounceH" type="range" min="2" max="16" value="8">
       <label>Wall width — <span id="bounceWVal">6</span></label>
       <input id="bounceW" type="range" min="2" max="16" value="6">
       <div class="rowbtns">
-        <button id="bounceGo">Launch 40</button>
-        <button id="bounceClear">Clear</button>
+        <button id="bounceGo">▶ 40</button>
+        <button id="bounceClear">✕</button>
       </div>
       <div class="twocol">
-        <div class="mini"><div class="k">Bounced</div><div class="v" id="bounceBack">0</div></div>
-        <div class="mini"><div class="k">Went through</div><div class="v" id="bounceThru">0</div></div>
+        <div class="mini"><div class="k">Back</div><div class="v" id="bounceBack">0</div></div>
+        <div class="mini"><div class="k">Through</div><div class="v" id="bounceThru">0</div></div>
       </div>
-      <div class="explain"><b>Now</b><p id="bounceTalk">Make the wall fat or tall. Then launch.</p></div>
+      <div class="explain"><b>Now</b><p id="bounceTalk">Change wall. Launch.</p></div>
     </div>
     <div class="card">
       <canvas class="viz tall" id="bounceCanvas"></canvas>
@@ -289,14 +302,25 @@
   <div class="meta" id="stageMeta">1 / 7</div>
   <div class="dots" id="dots"></div>
   <div class="navbtns">
-    <button id="prevBtn">BACK</button>
-    <button id="nextBtn">NEXT</button>
+    <button id="prevBtn">←</button>
+    <button id="nextBtn">→</button>
   </div>
 </div>
-<footer class="note">Arrow keys move between rooms</footer>
+<footer class="note">← → keys also work</footer>
+</div>
+<div id="tourBox" class="tour">
+  <div class="tourcard">
+    <div id="tourStep" class="muted">1 / 7</div>
+    <p id="tourText"></p>
+    <div class="rowbtns">
+      <button id="tourNext">Next</button>
+      <button id="tourSkip">Skip</button>
+    </div>
+  </div>
 </div>
 <script src="labs.js"></script>
 <script src="maze.js"></script>
 <script src="engine.js"></script>
+<script src="ui.js"></script>
 </body>
 </html>
