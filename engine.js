@@ -1,4 +1,4 @@
-/* Toy PIN hunt */
+/* Toy PIN hunt — simulated Grover on this laptop */
 const canvas=$('chart'), ctx=canvas.getContext('2d');
 let N=100000,Q=17,DIM=1<<17,OPT=Math.floor(Math.PI/4*Math.sqrt(100000));
 let state=[],history=[],running=false,mode='quantum',targetIndex=31415,runStart=0;
@@ -17,22 +17,45 @@ function draw(){
  ctx.clearRect(0,0,W,H);ctx.strokeStyle='#ddd4c3';ctx.lineWidth=1;
  for(let y=35;y<H;y+=42){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
  if(history.length){ctx.strokeStyle='#173e48';ctx.lineWidth=2;ctx.beginPath();history.forEach((p,i)=>{let x=i/(history.length-1||1)*W,y=H-18-p*(H-45);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke()}
- ctx.fillStyle='#766f61';ctx.font='14px Georgia';ctx.fillText('chance this is the right number',9,18);
+ ctx.fillStyle='#766f61';ctx.font='14px Georgia';ctx.fillText('P(right number) after each check',9,18);
 }
 function qnorm(){let s=0;for(const z of state)s+=z.r*z.r+z.i*z.i;return s}
+function writePinMath(c, classical){
+  const box=$('pinMath'); if(!box) return;
+  const k=c.OPT, n=c.N, avg=c.N/2;
+  if(classical){
+    box.innerHTML=
+      '<b>What this laptop is doing</b>'+
+      '<p>Normal hunt. It types 0000, 0001, 0002… Each try hashes the guess and checks a fingerprint. That count is a <i>query</i>.</p>'+
+      '<p>Pile N = '+fmt(n)+'. Average queries if the number is random: N/2 = '+fmt(avg)+'.</p>'+
+      '<p>This run may stop early when it hits. Worst case is all '+fmt(n)+'.</p>'+
+      '<p>Toy suitcase lock only. Not a real account.</p>';
+  } else {
+    box.innerHTML=
+      '<b>What this laptop is doing</b>'+
+      '<p>Not a quantum chip. It stores one list of '+fmt(n)+' strengths (amplitudes) and updates that list.</p>'+
+      '<p>Start: every code has strength 1/√N = '+(1/Math.sqrt(n)).toFixed(6)+', so P(right) = 1/N = '+(100/n).toFixed(4)+'%.</p>'+
+      '<p>One <i>query</i> here = one oracle flip on the secret index + one invert-about-mean. That pair is one Grover step.</p>'+
+      '<p>Best step count k = floor(π √N / 4) = floor(3.14159 × '+Math.sqrt(n).toFixed(2)+' / 4) = <b>'+fmt(k)+'</b>.</p>'+
+      '<p>Scoreboard “checks so far” is that k. Compare with normal average N/2 = '+fmt(avg)+'. Ratio ≈ '+(avg/k).toFixed(1)+'× fewer checks in the model.</p>'+
+      '<p>The extra memory slots ('+fmt(c.DIM)+') are the next power of two above N, like a '+c.Q+'-bit list. Unused slots stay 0.</p>'+
+      '<p>After k steps we pick one code with chance |strength|². Often the secret. Not always.</p>';
+  }
+}
 function fillTables(){
  const c=activeConfig(); const classical=mode==='classical';
  $('N').textContent=fmt(c.N);$('Q').textContent=c.Q;$('entropy').textContent=Math.log2(c.N).toFixed(2)+' bits';
  $('optimal').textContent=fmt(c.OPT);$('dimension').textContent=fmt(c.DIM);$('memory').textContent=(c.DIM*16/1024/1024).toFixed(2)+' MB';
  $('classAvg').textContent=fmt(c.N/2);$('quantumQueries').textContent=fmt(c.OPT);$('sqrtN').textContent=Math.sqrt(c.N).toFixed(2);
  $('ratio').textContent=(c.N/2/c.OPT).toFixed(1)+'x';
+ writePinMath(c, classical);
  const rows=[
-  ['Lock size',classical?'4 numbers':'5 numbers',classical?'Normal hunt types codes':'New hunt makes the right number strong','SET'],
-  ['How many codes',fmt(c.N),classical?'10,000 toy codes':'100,000 toy codes','SET'],
-  ['Tiny switches',String(c.Q),'enough to name every code','MATH'],
-  ['Smart steps',fmt(c.OPT),'much less than the whole pile','MATH'],
-  ['Normal average tries',fmt(c.N/2),'about half the pile','MATH'],
-  ['Fewer checks?',(c.N/2/c.OPT).toFixed(1)+'x','new hunt vs normal hunt','IDEA']
+  ['This machine','Laptop JS',classical?'Real hashes, one by one':'Simulated Grover list','SIM'],
+  ['Pile N',fmt(c.N),classical?'0000–9999':'00000–99999','SET'],
+  ['One query means',classical?'1 hash check':'1 mark + 1 boost','What we count','DEF'],
+  ['Query formula',classical?'about N/2':'k = floor(π√N / 4)','Textbook count','MATH'],
+  ['That number',classical?fmt(c.N/2):fmt(c.OPT),classical?'average tries':'steps this run will do','CALC'],
+  ['List length',fmt(c.DIM),'2^ceil(log2 N)','MEM']
  ];
  $('execTable').innerHTML=rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td><td>'+r[3]+'</td></tr>').join('');
 }
@@ -65,8 +88,9 @@ function quantumRun(){
  state=Array.from({length:DIM},(_,i)=>i<N?({r:initialAmp,i:0}):({r:0,i:0}));
  history=[];runStart=performance.now();
  $('engine').textContent='HUNTING';$('status').textContent='WORKING';$('log').innerHTML='';
- log('Looking at '+fmt(N)+' toy numbers together');
- log('Wrong numbers get weak. The right number gets strong.');
+ log('SIM: list of '+fmt(N)+' amplitudes on this laptop');
+ log('k = floor(π√N/4) = '+fmt(OPT)+' queries');
+ log('Each query = flip secret sign + invert about mean');
  let k=0;
  function step(){
   if(!running)return;
@@ -81,9 +105,9 @@ function quantumRun(){
   $('liveIter').textContent=k+' / '+OPT;$('liveProb').textContent=(p*100).toFixed(3)+'%';
   $('liveAmp').textContent=state[targetIndex].r.toFixed(7);$('liveOther').textContent=state[targetIndex===0?1:0].r.toFixed(7);
   $('liveNorm').textContent=currentNorm.toFixed(6);$('liveTime').textContent=Math.round(performance.now()-runStart)+' ms';
-  if(k===1)log('Marked the secret number.');
-  if(k===Math.floor(OPT/2))log('Halfway. The right number is getting strong.','ok');
-  if(k%25===0)log('Step '+k+' of '+OPT);
+  if(k===1)log('Query 1 done. P(right)='+(p*100).toFixed(3)+'%');
+  if(k===Math.floor(OPT/2))log('Half of k. P(right)='+(p*100).toFixed(3)+'%','ok');
+  if(k%25===0)log('Query '+k+' / '+OPT+' · P='+(p*100).toFixed(3)+'%');
   draw(); setTimeout(step,12);
  }
  step();
@@ -93,9 +117,9 @@ function measure(){
  for(let i=0;i<c.N;i++){acc+=state[i].r*state[i].r+state[i].i*state[i].i;if(r<=acc){measured=i;break}}
  const code=String(measured).padStart(5,'0'),p=state[targetIndex].r**2+state[targetIndex].i**2;
  $('shots').textContent='1';$('engine').textContent='LOOKED';$('status').textContent='DONE';
- $('resultCode').textContent=code;$('resultStatus').textContent='Chance it was right: '+(p*100).toFixed(1)+'%';$('result').classList.add('show');
- if(measured===targetIndex){ log('Found it: '+code,'ok'); $('ai').textContent='Found the suitcase number. This is not a real password.'; }
- else { log('Got a different number. Try again.','w'); $('ai').textContent='Not this time. Press RESET, then START.'; }
+ $('resultCode').textContent=code;$('resultStatus').textContent='1 look after '+fmt(c.OPT)+' simulated queries · P was '+(p*100).toFixed(1)+'%';$('result').classList.add('show');
+ if(measured===targetIndex){ log('Pick landed on secret '+code,'ok'); $('ai').textContent='k queries finished. One look. Got the suitcase number. Still a toy.'; }
+ else { log('Pick missed. Grover is likely, not sure.','w'); $('ai').textContent='k queries done. The look missed. Reset and try again.'; }
  running=false;$('status').textContent='DONE';fillTables();draw();
 }
 async function sha256(s){let b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
@@ -103,17 +127,17 @@ async function classicalRun(){
  if(running)return;mode='classical';configure();reset();configure();running=true;
  const target=String(activeConfig().target).padStart(4,'0'),targetHash=await sha256(target);
  $('engine').textContent='TYPING';$('status').textContent='ONE BY ONE';$('log').innerHTML='';$('result').classList.remove('show');
- $('ai').textContent='Normal hunt types 0000, then 0001, then 0002.';
- let found='',tested=0,t0=performance.now();log('Hiding the number');
+ $('ai').textContent='Each typed code is one query (one hash).';
+ let found='',tested=0,t0=performance.now();log('Queries = hash checks. Average would be N/2 = '+fmt(CN/2));
  for(let i=0;i<CN;i++){
    let candidate=String(i).padStart(4,'0');tested=i+1;
    if(await sha256(candidate)===targetHash){found=candidate;break}
-   if(i%1000===0){$('tested').textContent=fmt(tested);$('liveTime').textContent=Math.round(performance.now()-t0)+' ms';log('Tried '+fmt(tested)+' of '+fmt(CN));await new Promise(r=>setTimeout(r,0))}
+   if(i%1000===0){$('tested').textContent=fmt(tested);$('liveTime').textContent=Math.round(performance.now()-t0)+' ms';log('Queries so far '+fmt(tested));await new Promise(r=>setTimeout(r,0))}
  }
  let ms=performance.now()-t0;$('engine').textContent='FOUND';$('status').textContent='DONE';$('tested').textContent=fmt(tested);
- $('resultCode').textContent=found;$('resultStatus').textContent='Tried '+fmt(tested)+' numbers';$('result').classList.add('show');
- log('Found '+found,'ok');
- $('ai').textContent='Normal hunt found the suitcase number. A real password is much longer.';
+ $('resultCode').textContent=found;$('resultStatus').textContent=fmt(tested)+' hash queries (N/2 would be '+fmt(CN/2)+')';$('result').classList.add('show');
+ log('Hit after '+fmt(tested)+' queries','ok');
+ $('ai').textContent='This run used '+fmt(tested)+' queries. Textbook average is N/2.';
  running=false;fillTables();
 }
 $('qmode').onclick=()=>{mode='quantum';$('qmode').classList.add('active');$('cmode').classList.remove('active');$('run').textContent='START';configure();reset();configure()}
@@ -122,7 +146,7 @@ $('run').onclick=()=>mode==='quantum'?quantumRun():classicalRun();
 $('prepare').onclick=()=>{reset();configure();log('Ready','ok')};
 $('secret').oninput=configure;
 $('classicalSecret').oninput=configure;
-window.addEventListener('resize', ()=>{ try{drawBloch()}catch(e){} try{draw()}catch(e){} try{mazeEnsure()}catch(e){} });
+window.addEventListener('resize', ()=>{ try{draw()}catch(e){} try{mazeEnsure()}catch(e){} try{drawSlit()}catch(e){} try{drawCloud()}catch(e){} try{drawBounce()}catch(e){} });
 configure();reset();
 if(!location.hash) location.replace('#/overview');
 else show(parseHash());
