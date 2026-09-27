@@ -5,7 +5,8 @@ const canvas = $('mazeCanvas');
 if(!canvas) return;
 const ctx = canvas.getContext('2d');
 let maze=[], size=15, running=false, solution=null, explored=new Set(), frontier=new Set(), pathSet=new Set();
-const configs={ easy:{size:15,speed:18}, medium:{size:31,speed:8}, hard:{size:61,speed:2} };
+let heat=new Map();
+const configs={ easy:{size:15,speed:24}, medium:{size:31,speed:10}, hard:{size:61,speed:3} };
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 function log(s){
   const box=$('mazeLog');
@@ -47,12 +48,19 @@ function generate(){
     }
   }
   maze[1][1]=0; maze[size-2][size-2]=0;
-  solution=null;explored.clear();frontier.clear();pathSet.clear();
+  solution=null;explored.clear();frontier.clear();pathSet.clear();heat.clear();
   updateStats();draw();
   $('mazeStatus').textContent='New maze';
   $('mazeLog').innerHTML='';
   log('New maze ready');
   talk('Press Find way.');
+}
+function heatColor(p){
+  const t=Math.min(1,p*8);
+  const r=Math.round(244-t*180);
+  const g=Math.round(239-t*80);
+  const b=Math.round(223-t*40);
+  return 'rgb('+r+','+g+','+b+')';
 }
 function draw(){
   const w=canvas.width,h=canvas.height,cell=Math.min(w,h)/size;
@@ -60,9 +68,10 @@ function draw(){
   for(let r=0;r<size;r++)for(let c=0;c<size;c++){
     const k=key(r,c),x=c*cell,y=r*cell;
     let col=maze[r][c]?'#171612':'#f4efdf';
-    if(explored.has(k))col='#7a9aa3';
-    if(frontier.has(k))col='#c9a15b';
-    if(pathSet.has(k))col='#4f7a5b';
+    if(heat.has(k)) col=heatColor(heat.get(k));
+    if(explored.has(k) && !heat.has(k)) col='#7a9aa3';
+    if(frontier.has(k)) col='#c9a15b';
+    if(pathSet.has(k)) col='#4f7a5b';
     if(r===1&&c===1)col='#2a6f78';
     if(r===size-2&&c===size-2)col='#8a3d38';
     ctx.fillStyle=col;ctx.fillRect(x,y,Math.ceil(cell)+.5,Math.ceil(cell)+.5);
@@ -74,7 +83,7 @@ function updateStats(){
   $('mazeOpen').textContent=String(open);
   $('mazeExplored').textContent=String(explored.size);
   $('mazeFrontier').textContent=String(frontier.size);
-  $('mazeLen').textContent=solution?String(solution.length-1):'—';
+  $('mazeLen').textContent=solution?String(solution.length-1):'\u2014';
 }
 function neighbors(r,c){
   const out=[];
@@ -90,13 +99,27 @@ function reconstruct(parent){
   while(cur!==null){out.push(cur);if(cur===start)break;cur=parent.get(cur)}
   return out.reverse();
 }
+function bfsPath(){
+  const start=key(1,1),goal=key(size-2,size-2);
+  const q=[[1,1]], parent=new Map([[start,null]]);
+  let qi=0;
+  while(qi<q.length){
+    const [r,c]=q[qi++], k=key(r,c);
+    if(k===goal) return {parent, ok:true};
+    for(const [nr,nc] of neighbors(r,c)){
+      const nk=key(nr,nc);
+      if(!parent.has(nk)){ parent.set(nk,k); q.push([nr,nc]); }
+    }
+  }
+  return {parent, ok:parent.has(goal)};
+}
 async function classical(){
   const start=key(1,1),goal=key(size-2,size-2);
   const q=[[1,1]],parent=new Map([[start,null]]);
-  let qi=0; explored.clear();frontier.clear();pathSet.clear();
+  let qi=0; explored.clear();frontier.clear();pathSet.clear();heat.clear();
   $('mazeStatus').textContent='Walking';
-  talk('Walking hall by hall.');
-  log('Normal search');
+  talk('One square at a time.');
+  log('Normal search = hall by hall (BFS).');
   while(qi<q.length&&running){
     const [r,c]=q[qi++],k=key(r,c);
     explored.add(k);
@@ -110,88 +133,96 @@ async function classical(){
   }
   if(parent.has(goal)){
     solution=reconstruct(parent);solution.forEach(k=>pathSet.add(k));
-    $('mazeProb').textContent='Yes';$('mazeBar').style.width='100%';
-    log('Found a way. '+ (solution.length-1) +' steps.');
-    talk('Green is the way out.');
+    $('mazeProb').textContent='path';$('mazeBar').style.width='100%';
+    log('Path length '+(solution.length-1)+'.');
+    talk('Green is the way.');
   }else {
-    log('No way. Make a new maze.');
-    talk('No way. Press New maze.');
+    log('No path.');
+    talk('No path. New maze.');
   }
   $('mazeStatus').textContent='Done';running=false;draw();updateStats();
 }
 async function quantum(){
-  const open=maze.flat().filter(x=>x===0).length;
+  const cells=[]; const index=new Map();
+  for(let r=0;r<size;r++) for(let c=0;c<size;c++){
+    if(maze[r][c]===0){ index.set(key(r,c), cells.length); cells.push([r,c]); }
+  }
+  const n=cells.length;
+  const startI=index.get(key(1,1)), goalI=index.get(key(size-2,size-2));
+  if(startI==null || goalI==null){ log('Bad maze'); running=false; return; }
+  const adj=cells.map(([r,c])=>neighbors(r,c).map(([nr,nc])=>index.get(key(nr,nc))).filter(j=>j!=null));
+  const deg=adj.map(a=>Math.max(1,a.length));
+  let psi=new Float64Array(n); psi[startI]=1;
   const iters=+$('mazeIters').value;
-  $('mazeStatus').textContent='Hunting';
-  talk('Hunting many halls.');
-  log('New search');
-  explored.clear();frontier.clear();pathSet.clear();solution=null;
-  const start=key(1,1),goal=key(size-2,size-2);
-  let layer=[start], parent=new Map([[start,null]]), found=false;
-  for(let i=1;i<=iters && !found;i++){
-    const next=[];
-    for(const k of layer){
-      const [r,c]=coords(k); explored.add(k);
-      for(const [nr,nc] of neighbors(r,c)){
-        const nk=key(nr,nc);
-        if(!parent.has(nk)){parent.set(nk,k);next.push(nk);frontier.add(nk)}
-        if(nk===goal){found=true;break}
-      }
-      if(found)break;
+  const groverK=Math.max(1, Math.floor(Math.PI/4*Math.sqrt(n)));
+  explored.clear();frontier.clear();pathSet.clear();heat.clear();solution=null;
+  $('mazeStatus').textContent='Wave';
+  talk('A number sits on every open square. The wave moves.');
+  log('Wave search on '+n+' open squares.');
+  log('Each step: move wave to neighbour squares, then boost the end square.');
+  log('Laptop math. Not a quantum chip. Path at the end is drawn the normal way.');
+  log('Boost recipe length if the end were hidden: about '+groverK+' (\u03c0/4)\u221aN');
+  for(let step=1; step<=iters && running; step++){
+    const next=new Float64Array(n);
+    for(let i=0;i<n;i++){
+      next[i]+=psi[i]*0.2;
+      const s=Math.sqrt(deg[i]);
+      for(const j of adj[i]) next[j]+=psi[i]/Math.sqrt(deg[j])/s;
     }
-    layer=next;
-    const targetProb=Math.min(0.999,1-Math.exp(-explored.size/Math.max(1,open)*3.2));
-    $('mazeIter').textContent=String(i);
-    $('mazeProb').textContent=(targetProb*100).toFixed(0)+'%';
-    $('mazeBar').style.width=(targetProb*100)+'%';
-    updateStats();draw();
-    if(i===1)log('Looking at many halls');
+    let ss=0; for(let i=0;i<n;i++) ss+=next[i]*next[i];
+    const n1=Math.sqrt(ss)||1;
+    for(let i=0;i<n;i++) psi[i]=next[i]/n1;
+    if(Math.abs(psi[goalI])>1e-8){
+      psi[goalI]*=-1;
+      let mean=0; for(let i=0;i<n;i++) mean+=psi[i]; mean/=n;
+      for(let i=0;i<n;i++) psi[i]=2*mean-psi[i];
+      ss=0; for(let i=0;i<n;i++) ss+=psi[i]*psi[i];
+      const n2=Math.sqrt(ss)||1;
+      for(let i=0;i<n;i++) psi[i]/=n2;
+    }
+    heat.clear(); explored.clear(); frontier.clear();
+    let live=0;
+    for(let i=0;i<n;i++){
+      const p=psi[i]*psi[i];
+      if(p>1e-5){
+        const [r,c]=cells[i]; const k=key(r,c);
+        heat.set(k,p); explored.add(k); live++;
+      }
+    }
+    const pGoal=psi[goalI]*psi[goalI];
+    $('mazeIter').textContent=String(step);
+    $('mazeProb').textContent=(pGoal*100).toFixed(2)+'%';
+    $('mazeBar').style.width=Math.min(100,pGoal*100*4)+'%';
+    $('mazeFrontier').textContent=String(live);
+    updateStats(); draw();
+    if(step===1) log('Start square holds the whole wave.');
+    if(step%10===0) log('Step '+step+' \u00b7 P(end)='+(pGoal*100).toFixed(2)+'%');
     await sleep(Math.max(2,configs[$('mazeDiff').value].speed));
-    frontier.clear();
   }
-  if(!found){
-    log('Still looking');
-    while(layer.length&&!found){
-      const next=[];
-      for(const k of layer){
-        const [r,c]=coords(k);explored.add(k);
-        for(const [nr,nc] of neighbors(r,c)){
-          const nk=key(nr,nc);
-          if(!parent.has(nk)){parent.set(nk,k);next.push(nk)}
-          if(nk===goal){found=true;break}
-        }
-        if(found)break;
-      }
-      layer=next;
-      updateStats();draw();await sleep(1);
-    }
-  }
-  if(parent.has(goal)){
-    solution=reconstruct(parent);
-    solution.forEach((k,i)=>setTimeout(()=>{pathSet.add(k);draw()},Math.min(i*3,900)));
-    const finalP=Math.min(1,explored.size/Math.max(1,open)*1.25);
-    $('mazeProb').textContent=(finalP*100).toFixed(0)+'%';
-    $('mazeBar').style.width=(finalP*100)+'%';
+  const pack=bfsPath();
+  if(pack.ok){
+    solution=reconstruct(pack.parent);
+    solution.forEach((k,i)=>setTimeout(()=>{pathSet.add(k);draw();},Math.min(i*4,1200)));
     $('mazeLen').textContent=String(solution.length-1);
-    log('Found a way. '+(solution.length-1)+' steps.');
-    talk('Green is the way out.');
+    log('Look: one path is drawn with normal hall-walk, length '+(solution.length-1)+'.');
+    talk('Green path is the readout. Teal/brown is the wave.');
   }else {
-    log('No way. Make a new maze.');
-    talk('No way. Press New maze.');
+    log('No path.');
+    talk('No path. New maze.');
   }
-  $('mazeStatus').textContent='Done';running=false;updateStats();
+  $('mazeStatus').textContent='Done'; running=false; updateStats(); draw();
 }
 async function solve(){
   if(running)return;
   if(!maze.length) generate();
   running=true;
-  $('mazeIter').textContent='0';$('mazeProb').textContent='—';$('mazeBar').style.width='0%';
+  $('mazeIter').textContent='0';$('mazeProb').textContent='\u2014';$('mazeBar').style.width='0%';
   if($('mazeSolver').value==='classical')await classical();else await quantum();
 }
 function clearRun(){
-  if(running)return;explored.clear();frontier.clear();pathSet.clear();solution=null;
-  $('mazeIter').textContent='0';$('mazeProb').textContent='—';$('mazeBar').style.width='0%';$('mazeLen').textContent='—';
-  $('mazeStatus').textContent='Cleared';draw();updateStats();talk('Path cleared. Press Find way.');
+  if(running)return;explored.clear();frontier.clear();pathSet.clear();heat.clear();solution=null;
+  $('mazeIter').textContent='0';$('mazeProb').textContent='\u2014';$('mazeBar').style.width='0%';$('mazeLen').textContent='\u2014';
+  $('mazeStatus').textContent='Cleared';draw();updateStats();talk('Cleared.');
 }
 window.mazeEnsure = function(){
   if(!maze.length) generate();
