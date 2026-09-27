@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Q-OS — Quantum Exhibition</title>
+<title>Q-OS — Easy Quantum Show</title>
 <link rel="stylesheet" href="exhibit.css">
 </head>
 <body>
@@ -11,312 +11,343 @@
 <header>
   <div class="mast">
     <div>
-      <div class="kicker">Quantum Computing Exhibition · Hash-routed halls</div>
+      <div class="kicker">A simple show about quantum computers</div>
       <div class="logo">Q-OS</div>
-      <div class="tag">Walk the rooms. Every demo is a live local simulation.</div>
+      <div class="tag">Made so a parent can follow along in two minutes a room.</div>
     </div>
-    <div class="topstats" id="topStats">EXHIBIT 01 / 11 · #/overview</div>
+    <div class="topstats" id="topStats">ROOM 01 / 11 · #/overview</div>
   </div>
   <nav id="mainNav"></nav>
 </header>
 <main>
+
 <section class="view hall" data-view="overview">
-  <div class="eyebrow">Hall 01 · Opening</div>
-  <h1 class="hero-title">A working museum of quantum ideas.</h1>
-  <p class="small">This is not a slide deck that only talks. Each hall contains a small engine you can poke. The mathematics is real — amplitudes, Born-rule measurement, oracles — running in this browser. Nothing here is a claim of quantum hardware.</p>
+  <div class="eyebrow">Room 01 · Start here</div>
+  <h1 class="hero-title">Your phone is a very fast guesser. A quantum computer is a very clever one.</h1>
+  <p class="small">A normal computer checks ideas one after another. A quantum computer can line many ideas up at the same time, then let the wrong ones cancel out. This site is a pretend quantum lab in your browser — not a real quantum machine. Press NEXT. Each room has a toy you can tap.</p>
   <div class="ticket" id="hallTickets"></div>
-  <div class="explain"><b>How to tour</b><p>Use the top tabs, the tickets above, or the arrow keys. Every hall has a #/name address, so a visitor can jump straight to Entanglement or Grover.</p></div>
+  <div class="explain"><b>For parents</b><p>You do not need the math. Watch the pictures. The last rooms are the useful ones: finding a toy PIN, solving a maze, and where this might matter in real life.</p></div>
 </section>
+
 <section class="view hall" data-view="qubits">
   <div class="grid2">
     <div class="card">
-      <div class="eyebrow">Hall 02 · The atom of quantum information</div>
-      <h2>A qubit is a direction on a sphere</h2>
-      <p class="small">A classical bit is a coin on the table: heads or tails. A qubit is the same coin still in the air.</p>
-      <div class="formula">|psi> = cos(theta/2)|0> + e^{i phi} sin(theta/2)|1></div>
-      <p class="small">theta tips the arrow from |0> (north) toward |1> (south). phi twists it around the equator.</p>
-      <label>Polar angle theta — <span id="thetaVal">0°</span></label>
+      <div class="eyebrow">Room 02 · The spinning coin</div>
+      <h2>A normal bit is a coin on the table. A qubit is the coin still in the air.</h2>
+      <p class="small">Phones store 0 or 1. A qubit can lean toward 0, lean toward 1, or hang in the middle until you look. Looking makes it pick a side. That last part is why quantum computers feel weird.</p>
+      <p class="small"><b>Real life:</b> this is the tiny switch inside a future quantum chip — like one transistor, but spinny.</p>
+      <label>Tip it toward 1 — <span id="thetaVal">0°</span></label>
       <input type="range" id="theta" min="0" max="180" value="0">
-      <label>Azimuth phi — <span id="phiVal">0°</span></label>
+      <label>Twist it — <span id="phiVal">0°</span></label>
       <input type="range" id="phi" min="0" max="360" value="0">
       <div class="rowbtns">
-        <button data-prep="0">|0></button>
-        <button data-prep="1">|1></button>
-        <button data-prep="+">|+></button>
-        <button data-prep="-">|-></button>
-        <button data-prep="i">|+i></button>
-        <button data-prep="-i">|-i></button>
+        <button data-prep="0">Sure 0</button>
+        <button data-prep="1">Sure 1</button>
+        <button data-prep="+">Half and half</button>
+        <button data-prep="-">Other half</button>
+        <button data-prep="i">Twisted +</button>
+        <button data-prep="-i">Twisted -</button>
       </div>
     </div>
     <div class="card">
       <canvas class="viz" id="bloch"></canvas>
       <div class="twocol" style="margin-top:10px">
-        <div class="mini"><div class="k">P(|0>)</div><div class="v" id="p0">100%</div></div>
-        <div class="mini"><div class="k">P(|1>)</div><div class="v" id="p1">0%</div></div>
+        <div class="mini"><div class="k">Chance of 0</div><div class="v" id="p0">100%</div></div>
+        <div class="mini"><div class="k">Chance of 1</div><div class="v" id="p1">0%</div></div>
       </div>
       <div class="statebox" id="qubitState"></div>
-      <div class="explain"><b>Read this</b><p id="qubitExplain">Parked at |0>. Measuring now would almost certainly return 0.</p></div>
+      <div class="explain"><b>In plain words</b><p id="qubitExplain">This coin is sitting on 0. If you peek now, you almost always get 0.</p></div>
     </div>
   </div>
 </section>
+
 <section class="view hall" data-view="superposition">
   <div class="grid2">
     <div class="card">
-      <div class="eyebrow">Hall 03 · Many amplitudes, one shot</div>
-      <h2>Hadamard builds a fair superposition</h2>
-      <p class="small">H turns |0> into (|0>+|1>)/sqrt(2). Both answers exist as amplitudes. A measurement then uses the Born rule: P = |amplitude|^2.</p>
-      <div class="formula">H|0> = (|0> + |1>)/sqrt(2)  ->  P(0)=P(1)=1/2</div>
+      <div class="eyebrow">Room 03 · Both answers at once</div>
+      <h2>Split the coin, then peek many times.</h2>
+      <p class="small">The Mix button puts the coin in the air: half heads, half tails. Each peek still gives only one answer. Do it 200 times and you should see about 100 and 100. That is not a broken coin. That is the idea of doing two paths at once.</p>
+      <p class="small"><b>Real life:</b> this is how a quantum search can “consider” many lock codes together, instead of typing them one by one.</p>
       <div class="rowbtns">
-        <button id="hApply">Apply H to |0></button>
-        <button id="hReset">Reset to |0></button>
-        <button id="hShot">Take 1 shot</button>
-        <button id="hMany">Take 200 shots</button>
+        <button id="hApply">Mix it (H)</button>
+        <button id="hReset">Back to 0</button>
+        <button id="hShot">Peek once</button>
+        <button id="hMany">Peek 200 times</button>
       </div>
-      <div class="explain"><b>Copilot</b><p id="hTalk">Start in |0>. Apply H, then fire shots. The histogram should settle near 50 / 50.</p></div>
+      <div class="explain"><b>Guide</b><p id="hTalk">Start on 0. Press Mix, then Peek. You should get a jumble of 0s and 1s.</p></div>
     </div>
     <div class="card">
       <div class="bars" id="hBars"></div>
       <div class="twocol">
-        <div class="mini"><div class="k">Shots so far</div><div class="v" id="hShots">0</div></div>
-        <div class="mini"><div class="k">Last click</div><div class="v" id="hLast">—</div></div>
+        <div class="mini"><div class="k">Peeks so far</div><div class="v" id="hShots">0</div></div>
+        <div class="mini"><div class="k">Last peek</div><div class="v" id="hLast">—</div></div>
       </div>
-      <div class="statebox" id="hState">|psi> = 1.000 |0> + 0.000 |1></div>
+      <div class="statebox" id="hState">now: all 0</div>
     </div>
   </div>
 </section>
+
 <section class="view hall" data-view="gates">
   <div class="grid2">
     <div class="card">
-      <div class="eyebrow">Hall 04 · reversible verbs</div>
-      <h2>Gates rotate the state — they do not copy it</h2>
-      <p class="small">Every quantum gate is unitary: reversible and probability-preserving. Z only flips the sign of |1> — a phase you cannot see until it interferes.</p>
+      <div class="eyebrow">Room 04 · The buttons</div>
+      <h2>These buttons nudge the spinning coin. They never throw info in the bin.</h2>
+      <p class="small">Flip turns 0 into 1. Mix splits it. The twist buttons change a hidden spin you cannot see until two paths meet. Quantum recipes are just stacks of these buttons.</p>
+      <p class="small"><b>Real life:</b> a “quantum program” is not an app with menus. It is a short playlist of these flips and mixes.</p>
       <div class="rowbtns">
-        <button data-gate="H">H</button>
-        <button data-gate="X">X / NOT</button>
-        <button data-gate="Z">Z</button>
-        <button data-gate="S">S</button>
-        <button data-gate="T">T</button>
-        <button data-gate="R">Reset |0></button>
+        <button data-gate="H">Mix</button>
+        <button data-gate="X">Flip</button>
+        <button data-gate="Z">Twist 180</button>
+        <button data-gate="S">Twist 90</button>
+        <button data-gate="T">Twist 45</button>
+        <button data-gate="R">Reset</button>
       </div>
-      <div class="muted" style="margin-top:10px">H = Hadamard · X flips |0> and |1> · Z multiplies |1> by -1 · S is 90 deg phase · T is 45 deg phase.</div>
-      <div class="explain"><b>Why this matters</b><p>Classical NAND throws information away. A quantum circuit cannot. That is why oracles in Grover and Deutsch are reversible phase tricks.</p></div>
+      <div class="explain"><b>Watch the bars</b><p>If the bars stay the same height after a twist, nothing looks different yet. The next room shows why that hidden twist still matters.</p></div>
     </div>
     <div class="card">
       <canvas class="viz" id="gateCanvas"></canvas>
       <div class="statebox" id="gateState"></div>
       <div class="twocol">
-        <div class="mini"><div class="k">Norm</div><div class="v" id="gateNorm">1.000000</div></div>
-        <div class="mini"><div class="k">Last gate</div><div class="v" id="gateLast">RESET</div></div>
+        <div class="mini"><div class="k">Still a fair coin?</div><div class="v" id="gateNorm">1.000000</div></div>
+        <div class="mini"><div class="k">Last button</div><div class="v" id="gateLast">RESET</div></div>
       </div>
     </div>
   </div>
 </section>
+
 <section class="view hall" data-view="entanglement">
   <div class="grid2">
     <div class="card">
-      <div class="eyebrow">Hall 05 · two qubits, one story</div>
-      <h2>Build a Bell pair, then measure both</h2>
-      <p class="small">Start in |00>. Hadamard the first qubit, then CNOT onto the second. The state becomes (|00>+|11>)/sqrt(2).</p>
-      <div class="formula">H on A, then CNOT A->B  =  (|00> + |11>)/sqrt(2)</div>
+      <div class="eyebrow">Room 05 · Twin coins</div>
+      <h2>Link two coins so they always land the same.</h2>
+      <p class="small">Mix coin A, then copy that mix onto coin B. Now you do not have two separate coins. You have one story with two sides. Peek both: you should see 00 or 11, almost never a mismatch.</p>
+      <p class="small"><b>Real life:</b> labs use this to test links, and future networks may use it to notice if someone snooped on a message. It is not magic texting, and it does not send your thoughts.</p>
       <div class="rowbtns">
-        <button id="bellReset">Reset |00></button>
-        <button id="bellH">H on qubit A</button>
-        <button id="bellCnot">CNOT A->B</button>
-        <button id="bellPrep">Make Bell pair</button>
-        <button id="bellShot">Measure both</button>
-        <button id="bellMany">200 paired shots</button>
+        <button id="bellReset">Two plain 0s</button>
+        <button id="bellH">Mix coin A</button>
+        <button id="bellCnot">Link A to B</button>
+        <button id="bellPrep">Make twins</button>
+        <button id="bellShot">Peek both</button>
+        <button id="bellMany">Peek 200 pairs</button>
       </div>
-      <div class="explain"><b>What to notice</b><p id="bellTalk">After a Bell pair you almost never see 01 or 10. The disagreeing states have amplitude zero.</p></div>
+      <div class="explain"><b>Guide</b><p id="bellTalk">Press Make twins, then Peek 200 pairs. Mismatches should stay near zero.</p></div>
     </div>
     <div class="card">
       <div class="statebox" id="bellState"></div>
       <div class="bars" id="bellBars"></div>
       <div class="grid4" style="margin-top:10px">
-        <div class="mini"><div class="k">P(00)</div><div class="v" id="b00">100%</div></div>
-        <div class="mini"><div class="k">P(01)</div><div class="v" id="b01">0%</div></div>
-        <div class="mini"><div class="k">P(10)</div><div class="v" id="b10">0%</div></div>
-        <div class="mini"><div class="k">P(11)</div><div class="v" id="b11">0%</div></div>
+        <div class="mini"><div class="k">Both 0</div><div class="v" id="b00">100%</div></div>
+        <div class="mini"><div class="k">0 and 1</div><div class="v" id="b01">0%</div></div>
+        <div class="mini"><div class="k">1 and 0</div><div class="v" id="b10">0%</div></div>
+        <div class="mini"><div class="k">Both 1</div><div class="v" id="b11">0%</div></div>
       </div>
     </div>
   </div>
 </section>
+
 <section class="view hall" data-view="interference">
   <div class="grid2">
     <div class="card">
-      <div class="eyebrow">Hall 06 · amplitudes can cancel</div>
-      <h2>Two paths, one phase knob</h2>
-      <p class="small">Split |0> with H, paint a phase on the |1> path, then H again. Phase 0 returns |0>. Phase pi returns |1>. Grover is this idea at huge scale.</p>
-      <label>Phase on the |1> path — <span id="phaseVal">0°</span></label>
+      <div class="eyebrow">Room 06 · Waves that cancel</div>
+      <h2>Two ripples can add up or wipe each other out.</h2>
+      <p class="small">Same idea as noise-cancelling headphones: one wave plus an opposite wave becomes quiet. Quantum search uses that. Wrong answers get the “quiet” treatment. The right answer gets louder.</p>
+      <p class="small"><b>Real life:</b> this is the trick behind finding a toy PIN faster, and behind some chemistry simulations.</p>
+      <label>Shift the second ripple — <span id="phaseVal">0°</span></label>
       <input type="range" id="phase" min="0" max="360" value="0">
       <div class="rowbtns">
-        <button id="intRun">Recombine now</button>
-        <button id="intPi">Set phase = pi</button>
-        <button id="intZero">Set phase = 0</button>
+        <button id="intRun">Combine them</button>
+        <button id="intPi">Opposite ripples</button>
+        <button id="intZero">Same ripples</button>
       </div>
-      <div class="explain"><b>Copilot</b><p id="intTalk">Phase 0 is constructive for |0>. Drag toward 180 and watch P(|1>) rise.</p></div>
+      <div class="explain"><b>Guide</b><p id="intTalk">Same ripples land on 0. Opposite ripples land on 1. Drag the slider and watch the chances swap.</p></div>
     </div>
     <div class="card">
       <canvas class="viz" id="intCanvas"></canvas>
       <div class="twocol">
-        <div class="mini"><div class="k">P(|0>) after H-phase-H</div><div class="v" id="intP0">100%</div></div>
-        <div class="mini"><div class="k">P(|1>) after H-phase-H</div><div class="v" id="intP1">0%</div></div>
+        <div class="mini"><div class="k">Chance of 0</div><div class="v" id="intP0">100%</div></div>
+        <div class="mini"><div class="k">Chance of 1</div><div class="v" id="intP1">0%</div></div>
       </div>
     </div>
   </div>
 </section>
+
 <section class="view hall" data-view="deutsch">
   <div class="grid2">
     <div class="card">
-      <div class="eyebrow">Hall 07 · one question, two answers</div>
-      <h2>Deutsch: is the oracle constant or balanced?</h2>
-      <p class="small">Classically you must ask f twice. Deutsch asks once by sending both inputs through the oracle as a superposition and reading an interference bit.</p>
-      <div class="formula">|0>|1> -> H x H -> Uf -> H on A -> measure A</div>
-      <label>Secret oracle</label>
+      <div class="eyebrow">Room 07 · One peek, not two</div>
+      <h2>Is this mystery box always the same, or does it switch?</h2>
+      <p class="small">A normal check needs two tests: try 0, try 1. This quantum trick asks both at once and reads a yes/no about the pattern. It does not tell you the secret answers. It only tells you “same” or “mixed”.</p>
+      <p class="small"><b>Real life:</b> think of a cheap tester that only needs to know “is this batch all the same?” without opening every box.</p>
+      <label>What is inside the mystery box?</label>
       <select id="djOracle">
-        <option value="c0">Constant 0 · f(x)=0</option>
-        <option value="c1">Constant 1 · f(x)=1</option>
-        <option value="id">Balanced · f(x)=x</option>
-        <option value="not">Balanced · f(x)=NOT x</option>
+        <option value="c0">Always off</option>
+        <option value="c1">Always on</option>
+        <option value="id">Follows the switch</option>
+        <option value="not">Opposite of the switch</option>
       </select>
-      <button class="action" id="djRun">RUN DEUTSCH</button>
-      <div class="result" id="djResult"><div class="rk">Measured qubit A</div><div class="code" id="djCode">—</div><div class="rs" id="djStatus">No run yet.</div></div>
-      <div class="explain"><b>How to read the answer</b><p>Measure 0 = constant. Measure 1 = balanced.</p></div>
+      <button class="action" id="djRun">ONE PEEK</button>
+      <div class="result" id="djResult"><div class="rk">What we learned</div><div class="code" id="djCode">—</div><div class="rs" id="djStatus">No peek yet.</div></div>
+      <div class="explain"><b>How to read it</b><p>0 means “always the same.” 1 means “it switches.”</p></div>
     </div>
     <div class="card">
-      <div class="statebox" id="djState">Circuit idle.</div>
-      <div class="muted" style="margin-top:10px">2-qubit Deutsch with phase kickback. Teaching circuit, not a hardware-speedup claim.</div>
+      <div class="statebox" id="djState">Ready for one peek.</div>
+      <div class="muted" style="margin-top:10px">This is a tiny teaching demo. A real factory tester would look different. The point is: one clever question can beat two dull ones.</div>
     </div>
   </div>
 </section>
+
 <section class="view" data-view="grover">
 <div class="grid">
 <section class="card">
-  <h2>Grover experiment</h2>
-  <div class="small">Quantum mode runs Grover over a 5-digit space. Classical mode uses a 4-digit SHA-256 brute-force space so the runner stays responsive.</div>
-  <label id="targetLabel">Quantum target · 5 digits</label>
+  <h2>Find the toy PIN</h2>
+  <div class="small">This is a padlock on a suitcase, not anyone’s real account. Quantum mode waves through a 5-digit code. Normal mode types 4-digit codes one by one. Long real passwords stay hard. This laptop is only pretending.</div>
+  <label id="targetLabel">Secret 5-digit suitcase code</label>
   <input id="secret" maxlength="5" value="31415" inputmode="numeric" autocomplete="off">
   <div id="classicalTargetWrap" style="display:none">
-    <label>Classical target · 4 digits</label>
+    <label>Secret 4-digit suitcase code</label>
     <input id="classicalSecret" maxlength="4" value="3141" inputmode="numeric" autocomplete="off">
   </div>
-  <label>Search space</label>
+  <label>How many codes to search</label>
   <select id="spaceSelect">
-    <option value="100000">Quantum · 00000-99999 · 100,000 candidates</option>
-    <option value="10000">Classical · 0000-9999 · 10,000 candidates</option>
+    <option value="100000">Quantum hunt · 100,000 codes</option>
+    <option value="10000">Normal hunt · 10,000 codes</option>
   </select>
   <div class="mode">
-    <button id="qmode" class="active">QUANTUM</button>
-    <button id="cmode">CLASSICAL</button>
+    <button id="qmode" class="active">QUANTUM HUNT</button>
+    <button id="cmode">NORMAL HUNT</button>
   </div>
-  <button class="action" id="run">RUN QUANTUM EXPERIMENT</button>
-  <button class="secondary" id="prepare">PREPARE / RESET</button>
-  <div class="explain"><b>Q-OS COPILOT</b><p id="ai">Ready. The engine does the numerical work; the copilot only explains.</p></div>
-  <div class="result" id="result"><div class="rk">Measured candidate</div><div class="code" id="resultCode">—</div><div class="rs" id="resultStatus">No measurement yet.</div></div>
+  <button class="action" id="run">START THE HUNT</button>
+  <button class="secondary" id="prepare">RESET</button>
+  <div class="explain"><b>Guide</b><p id="ai">Ready. Quantum hunt makes the right code louder. Normal hunt tries codes in order. Neither one breaks a real website.</p></div>
+  <div class="result" id="result"><div class="rk">Code we landed on</div><div class="code" id="resultCode">—</div><div class="rs" id="resultStatus">No hunt yet.</div></div>
 </section>
 <div class="runner-area">
 <section class="card hero">
   <div class="herohead">
-    <div><div class="eyebrow">Target probability</div><div class="big" id="prob">0.001%</div></div>
+    <div><div class="eyebrow">Chance we have the right code</div><div class="big" id="prob">0.001%</div></div>
     <div class="status" id="status">READY</div>
   </div>
   <div class="chart"><canvas id="chart"></canvas></div>
   <div class="twocol">
-    <div class="mini"><div class="k">Target amplitude</div><div class="v" id="amp">0.0031623</div></div>
-    <div class="mini"><div class="k">Non-target amplitude</div><div class="v" id="other">0.0031623</div></div>
+    <div class="mini"><div class="k">How loud the right code is</div><div class="v" id="amp">0.0031623</div></div>
+    <div class="mini"><div class="k">How loud a wrong code is</div><div class="v" id="other">0.0031623</div></div>
   </div>
   <div class="log" id="log"></div>
 </section>
 <aside class="card">
-  <h2>Core telemetry</h2>
+  <h2>Scoreboard</h2>
   <div class="stats">
-    <div class="stat"><div class="k">Candidates</div><div class="v" id="N">100,000</div></div>
-    <div class="stat"><div class="k">Qubits</div><div class="v" id="Q">17</div></div>
-    <div class="stat"><div class="k">Entropy</div><div class="v" id="entropy">16.61 bits</div></div>
-    <div class="stat"><div class="k">Grover iterations</div><div class="v" id="optimal">248</div></div>
-    <div class="stat"><div class="k">Oracle calls</div><div class="v" id="oracle">0</div></div>
-    <div class="stat"><div class="k">Diffusion calls</div><div class="v" id="diff">0</div></div>
-    <div class="stat"><div class="k">Circuit depth</div><div class="v" id="depth">0</div></div>
-    <div class="stat"><div class="k">State dimension</div><div class="v" id="dimension">131,072</div></div>
-    <div class="stat"><div class="k">State memory</div><div class="v" id="memory">2.00 MB</div></div>
-    <div class="stat"><div class="k">Normalization</div><div class="v" id="norm">1.000000</div></div>
-    <div class="stat"><div class="k">Classical avg.</div><div class="v" id="classAvg">50,000</div></div>
-    <div class="stat"><div class="k">Quantum queries</div><div class="v" id="quantumQueries">248</div></div>
-    <div class="stat"><div class="k">sqrt(N)</div><div class="v" id="sqrtN">316.23</div></div>
-    <div class="stat"><div class="k">Theoretical ratio</div><div class="v" id="ratio">126.6x</div></div>
+    <div class="stat"><div class="k">Codes in the pile</div><div class="v" id="N">100,000</div></div>
+    <div class="stat"><div class="k">Spinning coins used</div><div class="v" id="Q">17</div></div>
+    <div class="stat"><div class="k">How mixed it starts</div><div class="v" id="entropy">16.61 bits</div></div>
+    <div class="stat"><div class="k">Smart steps</div><div class="v" id="optimal">248</div></div>
+    <div class="stat"><div class="k">“Is this it?” checks</div><div class="v" id="oracle">0</div></div>
+    <div class="stat"><div class="k">Louder-right-code steps</div><div class="v" id="diff">0</div></div>
+    <div class="stat"><div class="k">Recipe length</div><div class="v" id="depth">0</div></div>
+    <div class="stat"><div class="k">Memory slots</div><div class="v" id="dimension">131,072</div></div>
+    <div class="stat"><div class="k">Memory used</div><div class="v" id="memory">2.00 MB</div></div>
+    <div class="stat"><div class="k">Still a fair setup?</div><div class="v" id="norm">1.000000</div></div>
+    <div class="stat"><div class="k">Normal hunt average</div><div class="v" id="classAvg">50,000</div></div>
+    <div class="stat"><div class="k">Quantum hunt checks</div><div class="v" id="quantumQueries">248</div></div>
+    <div class="stat"><div class="k">Rough shortcut size</div><div class="v" id="sqrtN">316.23</div></div>
+    <div class="stat"><div class="k">Fewer checks?</div><div class="v" id="ratio">126.6x</div></div>
     <div class="stat"><div class="k">Engine</div><div class="v" id="engine">IDLE</div></div>
-    <div class="stat"><div class="k">Shots</div><div class="v" id="shots">0</div></div>
-    <div class="stat"><div class="k">Classical tested</div><div class="v" id="tested">0</div></div>
-    <div class="stat"><div class="k">Elapsed</div><div class="v" id="liveTime">0 ms</div></div>
+    <div class="stat"><div class="k">Final peeks</div><div class="v" id="shots">0</div></div>
+    <div class="stat"><div class="k">Codes typed (normal)</div><div class="v" id="tested">0</div></div>
+    <div class="stat"><div class="k">Time</div><div class="v" id="liveTime">0 ms</div></div>
   </div>
   <div class="section">
-    <h2 style="font-size:12px">Live runner data</h2>
+    <h2 style="font-size:12px">Live hunt</h2>
     <div class="stats">
-      <div class="stat"><div class="k">Iteration</div><div class="v" id="liveIter">0 / 248</div></div>
-      <div class="stat"><div class="k">Target P</div><div class="v" id="liveProb">0.001%</div></div>
-      <div class="stat"><div class="k">Target amp</div><div class="v" id="liveAmp">0.0031623</div></div>
-      <div class="stat"><div class="k">Other amp</div><div class="v" id="liveOther">0.0031623</div></div>
-      <div class="stat"><div class="k">State norm</div><div class="v" id="liveNorm">1.000000</div></div>
+      <div class="stat"><div class="k">Step</div><div class="v" id="liveIter">0 / 248</div></div>
+      <div class="stat"><div class="k">Chance right</div><div class="v" id="liveProb">0.001%</div></div>
+      <div class="stat"><div class="k">Right-code loudness</div><div class="v" id="liveAmp">0.0031623</div></div>
+      <div class="stat"><div class="k">Wrong-code loudness</div><div class="v" id="liveOther">0.0031623</div></div>
+      <div class="stat"><div class="k">Fairness check</div><div class="v" id="liveNorm">1.000000</div></div>
     </div>
   </div>
 </aside>
 </div>
 </div>
 <section class="section">
-<h2>Execution statistics</h2>
-<div class="tablewrap"><table><thead><tr><th>Metric</th><th>Value</th><th>Meaning</th><th>Status</th></tr></thead><tbody id="execTable"></tbody></table></div>
+<h2>What the numbers mean</h2>
+<div class="tablewrap"><table><thead><tr><th>Thing</th><th>Value</th><th>In plain words</th><th>Status</th></tr></thead><tbody id="execTable"></tbody></table></div>
 </section>
 </section>
+
+<section class="view hall" data-view="uses">
+  <div class="eyebrow">Room 09 · Why anyone cares</div>
+  <h1 class="hero-title">Where this shows up outside a classroom.</h1>
+  <p class="small">Quantum computers are not faster phones. They are special tools for a few hard jobs. Some of those jobs are already being practiced. Some are still “maybe someday.”</p>
+  <div class="ticket">
+    <a href="#/grover">
+      <div class="n">Toy lock / PIN hunt</div>
+      <div class="t">Finding a hidden code</div>
+      <div class="d">A normal search tries codes one by one. The quantum hunt in Room 08 makes the right toy PIN louder. Real long passwords are still safe on this laptop. The useful lesson: future machines may force banks to upgrade old locks.</div>
+    </a>
+    <a href="#/maze">
+      <div class="n">Maze solver</div>
+      <div class="t">Finding a path</div>
+      <div class="d">Room 11 drops you in a new maze every time. That is the same family of problem as “get the robot through the warehouse” or “find a route,” played as a game.</div>
+    </a>
+    <a href="#/deutsch">
+      <div class="n">One-peek tester</div>
+      <div class="t">Is the batch all the same?</div>
+      <div class="d">Room 07 is a tiny version of asking one clever question instead of two dull ones. Factories and labs like that idea.</div>
+    </a>
+    <div>
+      <div class="n">Medicine and materials</div>
+      <div class="t">Trying many molecule shapes</div>
+      <div class="d">Chemists care about how atoms sit next to each other. Quantum math is native to that world, so people hope future machines help design medicines and batteries. Not ready as a home app.</div>
+    </div>
+    <div>
+      <div class="n">Maps, traffic, rotas</div>
+      <div class="t">Picking a good plan</div>
+      <div class="d">“Which order should the vans visit the shops?” is a huge pile of guesses. Quantum search ideas may help some of those piles. Your car GPS today is still a normal computer, and it is already excellent.</div>
+    </div>
+    <div>
+      <div class="n">Safer messages someday</div>
+      <div class="t">New locks for the internet</div>
+      <div class="d">Some of today’s online locks were built when quantum machines were science fiction. Researchers are already designing next-generation locks so a future quantum computer cannot quietly open old ones.</div>
+    </div>
+  </div>
+  <div class="explain"><b>Honest line for a parent</b><p>This show will not unlock a phone, a Wi-Fi box, or a bank app. It shows the shape of the idea, with suitcase PINs and mazes, so the science is visible.</p></div>
+</section>
+
 <section class="view hall" data-view="compare">
-  <div class="eyebrow">Hall 09 · honest comparison</div>
-  <h2>What is actually faster, and what is not</h2>
-  <p class="small">Quantum advantage here is about query count against a black-box oracle, not this laptop beating itself.</p>
+  <div class="eyebrow">Room 10 · No fluff</div>
+  <h2>What this laptop is doing, and what it is not</h2>
+  <p class="small">If someone says “quantum means instant everything,” they are selling. Here is the calm version.</p>
   <div class="tablewrap" style="margin-top:12px">
     <table>
-      <thead><tr><th>Question</th><th>Classical</th><th>Quantum story</th><th>Hall</th></tr></thead>
+      <thead><tr><th>Job</th><th>Normal computer</th><th>Quantum idea</th><th>Try it</th></tr></thead>
       <tbody>
-        <tr><td>Search N unsorted items</td><td>~N/2 guesses</td><td>~pi*sqrt(N)/4 Grover steps</td><td>#/grover</td></tr>
-        <tr><td>Is f constant or balanced?</td><td>2 evaluations</td><td>1 Deutsch query</td><td>#/deutsch</td></tr>
-        <tr><td>Store one yes/no</td><td>1 bit</td><td>1 qubit, continuum of states</td><td>#/qubits</td></tr>
-        <tr><td>Two correlated coins</td><td>Shared random bit</td><td>Entangled amplitudes</td><td>#/entanglement</td></tr>
+        <tr><td>Find a toy PIN in a pile</td><td>Try about half the pile</td><td>Far fewer “is this it?” checks</td><td>#/grover</td></tr>
+        <tr><td>Walk a maze</td><td>Breadth-first search</td><td>Explore many corridors in a model</td><td>#/maze</td></tr>
+        <tr><td>Same-or-mixed tester</td><td>Two looks</td><td>One clever look</td><td>#/deutsch</td></tr>
+        <tr><td>Watch a movie, send WhatsApp</td><td>Already great</td><td>No reason to use quantum</td><td>—</td></tr>
+        <tr><td>Someone’s real password</td><td>Do not</td><td>Do not. This site will not.</td><td>—</td></tr>
       </tbody>
     </table>
   </div>
-  <div class="explain"><b>Say this at the booth</b><p>We simulate the linear algebra a real quantum processor would do. Grover saves oracle calls, not Chrome milliseconds.</p></div>
+  <div class="explain"><b>One sentence</b><p>We are simulating the school-science version of a quantum chip. The speed story is “fewer checks,” not “this webpage is a supercomputer.”</p></div>
 </section>
-<section class="view hall" data-view="notation">
-  <div class="eyebrow">Hall 10 · wall of symbols</div>
-  <h2>Notation you will see on the other walls</h2>
-  <div class="tablewrap">
-    <table>
-      <thead><tr><th>Symbol</th><th>Say it</th><th>Meaning</th></tr></thead>
-      <tbody>
-        <tr><td>|0>, |1></td><td>ket zero, ket one</td><td>The two computational-basis states of a qubit.</td></tr>
-        <tr><td>|psi></td><td>ket psi</td><td>A general state — a list of complex amplitudes.</td></tr>
-        <tr><td>alpha, beta</td><td>amplitudes</td><td>May be negative or imaginary.</td></tr>
-        <tr><td>|alpha|^2</td><td>Born probability</td><td>Chance of that basis state.</td></tr>
-        <tr><td>H, X, Z, S, T</td><td>gates</td><td>One-qubit reversible operations.</td></tr>
-        <tr><td>CNOT</td><td>see-not</td><td>Flip target if control is |1>.</td></tr>
-        <tr><td>Uf</td><td>oracle</td><td>A reversible hiding of a function f.</td></tr>
-        <tr><td>sqrt(N)</td><td>square root of N</td><td>Grover query scale.</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
+
 <section class="view" data-view="maze">
-  <div class="eyebrow">Hall 11 · Q-MAZE laboratory</div>
-  <p class="small">The original maze lab, now a first-class page so hash routing can open it cleanly.</p>
-  <iframe class="maze-frame" id="mazeFrame" title="Q-MAZE Quantum Maze Laboratory" src="about:blank"></iframe>
+  <div class="eyebrow">Room 11 · Maze solver</div>
+  <p class="small">A fresh maze every time. Press generate, then solve. Normal mode walks corridor by corridor. Quantum mode is a teaching search that lights up the hunt. Same kind of puzzle as “help the robot reach the charging pad.”</p>
+  <iframe class="maze-frame" id="mazeFrame" title="Maze solver" src="about:blank"></iframe>
 </section>
 </main>
 <div class="stagebar">
-  <div class="meta" id="stageMeta">Exhibit 01 / 11 · Opening hall</div>
+  <div class="meta" id="stageMeta">Room 01 / 11 · Start here</div>
   <div class="dots" id="dots"></div>
   <div class="navbtns">
-    <button id="prevBtn">PREV</button>
+    <button id="prevBtn">BACK</button>
     <button id="nextBtn">NEXT</button>
   </div>
 </div>
-<footer class="note">Q-OS Exhibition · Educational simulator · Arrow keys change halls</footer>
+<footer class="note">Q-OS · A pretend quantum lab in the browser · Arrow keys move between rooms</footer>
 </div>
 <script src="labs.js"></script>
 <script src="engine.js"></script>
