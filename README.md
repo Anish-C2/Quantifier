@@ -1,40 +1,25 @@
-# Quantifier — Q-OS Exhibition
-
-An offline, hash-routed quantum computing exhibition.
+# Quantifier — easy quantum show
 
 Live: https://anish-c2.github.io/Quantifier/
 
-## How to present
+This is a pretend quantum lab in the browser. It is written so a parent can follow it. No teacher-speak required.
 
-Open the site on a laptop or kiosk. Use **← →** or the on-screen **PREV / NEXT** buttons to walk visitors through the halls. Every hall has a stable URL.
+## Walk it like this
 
-| Hall | Hash route |
-|---|---|
-| Opening hall | `#/overview` |
-| The qubit | `#/qubits` |
-| Superposition | `#/superposition` |
-| Quantum gates | `#/gates` |
-| Entanglement | `#/entanglement` |
-| Interference | `#/interference` |
-| Deutsch algorithm | `#/deutsch` |
-| Grover search lab | `#/grover` |
-| Classical vs quantum | `#/compare` |
-| Notation wall | `#/notation` |
-| Q-MAZE | `#/maze` |
+Use NEXT, BACK, or the arrow keys.
 
-Example: `https://anish-c2.github.io/Quantifier/#/entanglement`
+1. Start — what a quantum computer is, in one breath
+2. Coin — 0, 1, or still in the air
+3. Both — peek many times
+4. Buttons — flip, mix, twist
+5. Twins — two coins that match
+6. Waves — cancel the wrong answers
+7. One peek — same or mixed?
+8. Toy PIN — suitcase lock hunt (not a real password)
+9. Real life — maze, PIN hunt, medicine, new internet locks
+10. Honest — what this laptop is not
+11. Maze — a new maze every time
 
-## What actually runs
+## Please say this out loud
 
-Everything is a **local browser simulation**. No quantum hardware, no network accounts, no API keys.
-
-- 1- and 2-qubit labs use a small complex state-vector engine.
-- Grover uses the original Q-OS amplitude amplification on a 5-digit toy space (17 qubits / 100,000 valid states).
-- Classical mode is an independent SHA-256 brute-force on 4 digits so the live runner stays responsive.
-- Q-MAZE is the original maze laboratory, now a real page (`maze.html`) instead of an inline string.
-
-## Files
-
-- `index.html` — exhibition shell, routing, and all halls
-- `maze.html` — Q-MAZE laboratory
-- `README.md` — this note
+The PIN room is a suitcase lock. It will not open a phone, Wi-Fi, or bank app. Long real passwords stay hard. The point is the idea: fewer clever checks, not a magic cracker.
